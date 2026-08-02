@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 
-app=FastAPI(
-    title="Starting up",
-    version="0.0.1",
+from app.api.chat import router as chat_router
+from app.core.config import settings
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.VERSION,
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to Project Nexus"}
-
+app.include_router(chat_router)
