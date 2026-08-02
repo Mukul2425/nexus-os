@@ -6,3 +6,14 @@
 - [ ] LLM integration
 - [ ] Frontend
 - [ ] Streaming
+
+
+Backend Foundation
+
+✔ FastAPI
+
+✔ Swagger
+
+✔ Chat Endpoint
+
+⬜ LLM Integration
