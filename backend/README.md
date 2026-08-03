@@ -2,8 +2,8 @@
 
 - [x] Repository initialized
 - [x] Project documentation
-- [ ] Backend foundation
-- [ ] LLM integration
+- [x] Backend foundation
+- [x] LLM integration
 - [ ] Frontend
 - [ ] Streaming
 
@@ -16,4 +16,4 @@ Backend Foundation
 
 ✔ Chat Endpoint
 
-⬜ LLM Integration
+✔ Gemini Integration
