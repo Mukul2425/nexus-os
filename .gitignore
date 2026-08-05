@@ -14,6 +14,14 @@ node_modules/      # Node.js dependencies
 /vendor/           # PHP Composer or Go dependencies
 .venv/             # Python virtual environment
 env/               # Alternative Python virtual environment
+backend/.env
+backend/.venv
+# Ignore all environment and configuration files in backend
+backend/.env
+backend/.env.*
+backend/*.env
+backend/*.local
+backend/*.config
 
 # ---------------------------------------------------------------------
 # Build Outputs & Generated Files

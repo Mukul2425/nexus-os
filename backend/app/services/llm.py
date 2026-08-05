@@ -1,15 +1,26 @@
 
 from google import genai
 from app.core.config import Settings
+from app.schemas.chat import ChatRequest, ChatResponse, ChatMessage
+
 
 client = genai.Client(api_key=Settings().GEMINI_API_KEY)
 
 
-def generate_response(message: str) -> str:
+def generate_response(messages: list[ChatMessage]) -> str:
+    conversation = []
+
+    for message in messages:
+        conversation.append(
+            {"role": message.role,
+            "parts": [{"text": message.content}]
+            }
+            )
+
+
     response = client.models.generate_content(
         model="gemini-2.5-flash",
-        contents=message,
-
+        contents=conversation,
     )
     return response.text
     """
