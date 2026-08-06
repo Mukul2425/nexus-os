@@ -1,3 +1,4 @@
+v0.1.0
 ## Unreleased
 
 ### Added
@@ -17,3 +18,13 @@
 - Gemini API integration
 - Environment-based configuration
 - LLM service implementation
+
+## v0.1.0 - Backend Foundation
+
+### Added
+- FastAPI backend
+- Swagger documentation
+- Chat endpoint
+- Gemini integration
+- Multi-turn conversations
+
