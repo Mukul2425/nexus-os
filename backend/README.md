@@ -5,7 +5,7 @@
 - [x] Backend foundation
 - [x] LLM integration
 - [ ] Frontend
-- [ ] Streaming
+- [x] Streaming
 
 
 Backend Foundation
