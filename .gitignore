@@ -6,7 +6,36 @@ Thumbs.db          # Windows specific system files
 .vscode/           # Visual Studio Code settings
 .idea/             # JetBrains IDE settings (IntelliJ, WebStorm, etc.)
 *.suo              # Visual Studio solution user options
+# Python
+__pycache__/
+*.py[cod]
 
+# Virtual Environments
+.venv/
+venv/
+
+# Environment
+.env
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+.pytest_cache/
+
+# Type checking
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Coverage
+.coverage
+htmlcov/
 # ---------------------------------------------------------------------
 # Dependencies & Package Managers
 # ---------------------------------------------------------------------
