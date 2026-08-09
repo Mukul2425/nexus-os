@@ -5,8 +5,10 @@ class ChatMessage(BaseModel):
     role: Literal["system", "user", "assistant"]
     content: str
 class ChatRequest(BaseModel):
-    messages: list[ChatMessage]
 
+    conversation_id: str
+
+    message: str
 class ChatResponse(BaseModel):
+
     response: str
-    

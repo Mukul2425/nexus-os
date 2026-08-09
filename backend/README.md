@@ -6,7 +6,6 @@
 - [x] LLM integration
 - [ ] Frontend
 - [x] Streaming
-- [x]Prompt Management
 
 
 Backend Foundation
@@ -18,5 +17,3 @@ Backend Foundation
 ✔ Chat Endpoint
 
 ✔ Gemini Integration
-
-✔ Prompt Management 
