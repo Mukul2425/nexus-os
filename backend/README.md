@@ -6,7 +6,7 @@
 - [x] LLM integration
 - [ ] Frontend
 - [x] Streaming
-
+- [x] Conversation Management
 
 Backend Foundation
 
@@ -17,3 +17,5 @@ Backend Foundation
 ✔ Chat Endpoint
 
 ✔ Gemini Integration
+
+✔ Conversation Management
