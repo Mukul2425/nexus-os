@@ -1,0 +1,276 @@
+2026-08-13 17:14:47,567 | INFO | request_id=67d9ca83-bc82-4e66-bd99-1c5e825fedf2 method=GET path=/ status=404 latency=0.001s
+2026-08-13 17:15:16,472 | INFO | request_id=5386a9e0-2dc8-4731-9971-4309a287d40e method=GET path=/docs status=200 latency=0.000s
+2026-08-13 17:15:16,831 | INFO | request_id=a6a0586b-dbeb-4f73-abd9-2d5e310b1405 method=GET path=/openapi.json status=200 latency=0.003s
+2026-08-13 22:27:31,078 | INFO | request_id=18ee90ea-c7a4-4ea9-8996-1236f85e26aa method=GET path=/docs status=200 latency=0.002s
+2026-08-13 22:27:31,126 | INFO | request_id=f8fdc8f7-ec20-43cf-bc65-73d5af93d01a method=GET path=/openapi.json status=200 latency=0.000s
+2026-08-13 22:32:22,362 | INFO | request_id=aeba4c72-5a7d-452b-8e42-d95916c1e21d method=GET path=/docs status=200 latency=0.001s
+2026-08-13 22:32:22,419 | INFO | request_id=1b2d8fe4-edf9-460e-8271-4603e6b0fa9b method=GET path=/openapi.json status=200 latency=0.008s
+2026-08-13 22:32:36,962 | INFO | request_id=de58ee82-9731-41cc-8d79-ed09f8f103b7 method=POST path=/conversation status=200 latency=0.006s
+2026-08-13 22:33:11,094 | INFO | chat_request request_id=2ed30ad9-e291-4ddb-be93-05278176bc64 conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea
+2026-08-13 22:33:11,097 | INFO | user_message_saved request_id=2ed30ad9-e291-4ddb-be93-05278176bc64 conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea
+2026-08-13 22:33:11,098 | INFO | conversation_history_loaded request_id=2ed30ad9-e291-4ddb-be93-05278176bc64 conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea messages=1
+2026-08-13 22:33:11,098 | INFO | llm_request request_id=2ed30ad9-e291-4ddb-be93-05278176bc64 provider=gemini model=gemini-2.5-flash messages=2
+2026-08-13 22:33:11,619 | ERROR | llm_error request_id=2ed30ad9-e291-4ddb-be93-05278176bc64 provider=gemini model=gemini-2.5-flash latency=0.521s
+Traceback (most recent call last):
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/app/services/llm/gemini.py", line 53, in generate_response
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=_build_contents(messages),
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/models.py", line 6602, in generate_content
+    response = self._generate_content(
+        model=model, contents=contents, config=parsed_config_to_call
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/models.py", line 5028, in _generate_content
+    response = self._api_client.request(
+        'post', path, request_dict, http_options
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1708, in request
+    response = self._request(http_request, http_options, stream=False)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1495, in _request
+    return self._retry(self._request_once, http_request, stream)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 470, in __call__
+    do = self.iter(retry_state=retry_state)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ~~~~~~~~~~~~~~~~~^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 395, in __get_result
+    raise self._exception
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 473, in __call__
+    result = fn(*args, **kwargs)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1472, in _request_once
+    errors.APIError.raise_for_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/errors.py", line 155, in raise_for_response
+    cls.raise_error(response.status_code, response_json, response)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/errors.py", line 184, in raise_error
+    raise ClientError(status_code, response_json, response)
+google.genai.errors.ClientError: 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': "Role 'system' is not supported. Please use a valid role: MODEL, USER.", 'status': 'INVALID_ARGUMENT'}}
+2026-08-13 22:33:57,316 | INFO | chat_request request_id=a196d3d8-0460-48e1-8eca-ab12fdaae3a5 conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea
+2026-08-13 22:33:57,317 | INFO | user_message_saved request_id=a196d3d8-0460-48e1-8eca-ab12fdaae3a5 conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea
+2026-08-13 22:33:57,318 | INFO | conversation_history_loaded request_id=a196d3d8-0460-48e1-8eca-ab12fdaae3a5 conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea messages=2
+2026-08-13 22:33:57,318 | INFO | llm_request request_id=a196d3d8-0460-48e1-8eca-ab12fdaae3a5 provider=gemini model=gemini-2.5-flash messages=3
+2026-08-13 22:33:58,108 | ERROR | llm_error request_id=a196d3d8-0460-48e1-8eca-ab12fdaae3a5 provider=gemini model=gemini-2.5-flash latency=0.790s
+Traceback (most recent call last):
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/app/services/llm/gemini.py", line 53, in generate_response
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=_build_contents(messages),
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/models.py", line 6602, in generate_content
+    response = self._generate_content(
+        model=model, contents=contents, config=parsed_config_to_call
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/models.py", line 5028, in _generate_content
+    response = self._api_client.request(
+        'post', path, request_dict, http_options
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1708, in request
+    response = self._request(http_request, http_options, stream=False)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1495, in _request
+    return self._retry(self._request_once, http_request, stream)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 470, in __call__
+    do = self.iter(retry_state=retry_state)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ~~~~~~~~~~~~~~~~~^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 395, in __get_result
+    raise self._exception
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 473, in __call__
+    result = fn(*args, **kwargs)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1472, in _request_once
+    errors.APIError.raise_for_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/errors.py", line 155, in raise_for_response
+    cls.raise_error(response.status_code, response_json, response)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/errors.py", line 184, in raise_error
+    raise ClientError(status_code, response_json, response)
+google.genai.errors.ClientError: 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': "Role 'system' is not supported. Please use a valid role: MODEL, USER.", 'status': 'INVALID_ARGUMENT'}}
+2026-08-13 22:35:13,853 | INFO | chat_request request_id=10e94f7c-56d6-4a6a-9286-fa4361559eeb conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea
+2026-08-13 22:35:13,855 | INFO | user_message_saved request_id=10e94f7c-56d6-4a6a-9286-fa4361559eeb conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea
+2026-08-13 22:35:13,856 | INFO | conversation_history_loaded request_id=10e94f7c-56d6-4a6a-9286-fa4361559eeb conversation_id=0e842b81-7faa-473f-9400-b3c6f49fb0ea messages=3
+2026-08-13 22:35:13,856 | INFO | llm_request request_id=10e94f7c-56d6-4a6a-9286-fa4361559eeb provider=gemini model=gemini-2.5-flash messages=4
+2026-08-13 22:35:14,513 | ERROR | llm_error request_id=10e94f7c-56d6-4a6a-9286-fa4361559eeb provider=gemini model=gemini-2.5-flash latency=0.657s
+Traceback (most recent call last):
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/app/services/llm/gemini.py", line 53, in generate_response
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=_build_contents(messages),
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/models.py", line 6602, in generate_content
+    response = self._generate_content(
+        model=model, contents=contents, config=parsed_config_to_call
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/models.py", line 5028, in _generate_content
+    response = self._api_client.request(
+        'post', path, request_dict, http_options
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1708, in request
+    response = self._request(http_request, http_options, stream=False)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1495, in _request
+    return self._retry(self._request_once, http_request, stream)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 470, in __call__
+    do = self.iter(retry_state=retry_state)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ~~~~~~~~~~~~~~~~~^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 395, in __get_result
+    raise self._exception
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 473, in __call__
+    result = fn(*args, **kwargs)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1472, in _request_once
+    errors.APIError.raise_for_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/errors.py", line 155, in raise_for_response
+    cls.raise_error(response.status_code, response_json, response)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/errors.py", line 184, in raise_error
+    raise ClientError(status_code, response_json, response)
+google.genai.errors.ClientError: 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': "Role 'system' is not supported. Please use a valid role: MODEL, USER.", 'status': 'INVALID_ARGUMENT'}}
+2026-08-16 01:15:31,295 | INFO | request_id=dbd19d3d-165b-4c2c-bd7e-ddcf36a04f55 method=GET path=/docs status=200 latency=0.001s
+2026-08-16 01:15:31,370 | INFO | request_id=d97267e9-270a-4d7b-86ce-e433f57886eb method=GET path=/openapi.json status=200 latency=0.006s
+2026-08-16 01:15:38,590 | INFO | request_id=6f27678d-2f83-4f6f-a014-ef13ff2055de method=POST path=/conversation status=200 latency=0.011s
+2026-08-16 01:16:03,808 | INFO | chat_request request_id=91782c5c-5014-4a3f-81ad-d50630bafc49 conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:16:03,810 | INFO | user_message_saved request_id=91782c5c-5014-4a3f-81ad-d50630bafc49 conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:16:03,811 | INFO | conversation_history_loaded request_id=91782c5c-5014-4a3f-81ad-d50630bafc49 conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8 messages=1
+2026-08-16 01:16:03,811 | INFO | llm_request request_id=91782c5c-5014-4a3f-81ad-d50630bafc49 provider=gemini model=gemini-2.5-flash messages=2
+2026-08-16 01:16:04,607 | ERROR | llm_error request_id=91782c5c-5014-4a3f-81ad-d50630bafc49 provider=gemini model=gemini-2.5-flash latency=0.796s
+Traceback (most recent call last):
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/app/services/llm/gemini.py", line 53, in generate_response
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=_build_contents(messages),
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/models.py", line 6602, in generate_content
+    response = self._generate_content(
+        model=model, contents=contents, config=parsed_config_to_call
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/models.py", line 5028, in _generate_content
+    response = self._api_client.request(
+        'post', path, request_dict, http_options
+    )
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1708, in request
+    response = self._request(http_request, http_options, stream=False)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1495, in _request
+    return self._retry(self._request_once, http_request, stream)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 470, in __call__
+    do = self.iter(retry_state=retry_state)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ~~~~~~~~~~~~~~~~~^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 395, in __get_result
+    raise self._exception
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/tenacity/__init__.py", line 473, in __call__
+    result = fn(*args, **kwargs)
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/_api_client.py", line 1472, in _request_once
+    errors.APIError.raise_for_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/errors.py", line 155, in raise_for_response
+    cls.raise_error(response.status_code, response_json, response)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mukul/Documents/PROJECTS/nexus-os/backend/.venv/lib/python3.14/site-packages/google/genai/errors.py", line 184, in raise_error
+    raise ClientError(status_code, response_json, response)
+google.genai.errors.ClientError: 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': "Role 'system' is not supported. Please use a valid role: MODEL, USER.", 'status': 'INVALID_ARGUMENT'}}
+2026-08-16 01:20:26,439 | INFO | chat_request request_id=b2ade802-d397-408d-b42e-c11d6611ddda conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:20:26,442 | INFO | user_message_saved request_id=b2ade802-d397-408d-b42e-c11d6611ddda conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:20:26,443 | INFO | conversation_history_loaded request_id=b2ade802-d397-408d-b42e-c11d6611ddda conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8 messages=2
+2026-08-16 01:20:26,443 | INFO | llm_request request_id=b2ade802-d397-408d-b42e-c11d6611ddda provider=gemini model=gemini-2.5-flash messages=3
+2026-08-16 01:20:28,394 | INFO | llm_response request_id=b2ade802-d397-408d-b42e-c11d6611ddda provider=gemini model=gemini-2.5-flash latency=1.951s
+2026-08-16 01:20:28,394 | INFO | llm_response_received request_id=b2ade802-d397-408d-b42e-c11d6611ddda conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:20:28,395 | INFO | assistant_message_saved request_id=b2ade802-d397-408d-b42e-c11d6611ddda conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:20:28,396 | INFO | request_id=b2ade802-d397-408d-b42e-c11d6611ddda method=POST path=/chat status=200 latency=1.959s
+2026-08-16 01:22:56,777 | INFO | chat_request request_id=9fceefff-c869-438e-ada8-b675bd110dfd conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:22:56,778 | INFO | user_message_saved request_id=9fceefff-c869-438e-ada8-b675bd110dfd conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:22:56,779 | INFO | conversation_history_loaded request_id=9fceefff-c869-438e-ada8-b675bd110dfd conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8 messages=4
+2026-08-16 01:22:56,779 | INFO | llm_request request_id=9fceefff-c869-438e-ada8-b675bd110dfd provider=gemini model=gemini-2.5-flash messages=5
+2026-08-16 01:22:58,001 | INFO | llm_response request_id=9fceefff-c869-438e-ada8-b675bd110dfd provider=gemini model=gemini-2.5-flash latency=1.222s
+2026-08-16 01:22:58,001 | INFO | llm_response_received request_id=9fceefff-c869-438e-ada8-b675bd110dfd conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:22:58,003 | INFO | assistant_message_saved request_id=9fceefff-c869-438e-ada8-b675bd110dfd conversation_id=bedab3f7-eb0c-41cf-8ea7-2d44388b0ad8
+2026-08-16 01:22:58,003 | INFO | request_id=9fceefff-c869-438e-ada8-b675bd110dfd method=POST path=/chat status=200 latency=1.227s
+2026-08-16 01:24:08,992 | INFO | request_id=d1e6ac62-6e36-4a35-b3a6-6c9936866ac4 method=POST path=/conversation status=200 latency=0.012s
+2026-08-16 01:24:36,812 | INFO | chat_request request_id=12500f0e-0ddb-4378-acbe-cb54ed7fa522 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:24:36,813 | INFO | user_message_saved request_id=12500f0e-0ddb-4378-acbe-cb54ed7fa522 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:24:36,814 | INFO | conversation_history_loaded request_id=12500f0e-0ddb-4378-acbe-cb54ed7fa522 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1 messages=1
+2026-08-16 01:24:36,814 | INFO | llm_request request_id=12500f0e-0ddb-4378-acbe-cb54ed7fa522 provider=gemini model=gemini-2.5-flash messages=2
+2026-08-16 01:24:39,687 | INFO | llm_response request_id=12500f0e-0ddb-4378-acbe-cb54ed7fa522 provider=gemini model=gemini-2.5-flash latency=2.873s
+2026-08-16 01:24:39,688 | INFO | llm_response_received request_id=12500f0e-0ddb-4378-acbe-cb54ed7fa522 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:24:39,690 | INFO | assistant_message_saved request_id=12500f0e-0ddb-4378-acbe-cb54ed7fa522 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:24:39,692 | INFO | request_id=12500f0e-0ddb-4378-acbe-cb54ed7fa522 method=POST path=/chat status=200 latency=2.880s
+2026-08-16 01:25:00,950 | INFO | chat_request request_id=0613def9-bb16-4f63-8db3-22a0fa4c34a1 conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1
+2026-08-16 01:25:00,952 | INFO | user_message_saved request_id=0613def9-bb16-4f63-8db3-22a0fa4c34a1 conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1
+2026-08-16 01:25:00,952 | INFO | conversation_history_loaded request_id=0613def9-bb16-4f63-8db3-22a0fa4c34a1 conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1 messages=1
+2026-08-16 01:25:00,952 | INFO | llm_request request_id=0613def9-bb16-4f63-8db3-22a0fa4c34a1 provider=gemini model=gemini-2.5-flash messages=2
+2026-08-16 01:25:03,035 | INFO | llm_response request_id=0613def9-bb16-4f63-8db3-22a0fa4c34a1 provider=gemini model=gemini-2.5-flash latency=2.083s
+2026-08-16 01:25:03,035 | INFO | llm_response_received request_id=0613def9-bb16-4f63-8db3-22a0fa4c34a1 conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1
+2026-08-16 01:25:03,037 | INFO | assistant_message_saved request_id=0613def9-bb16-4f63-8db3-22a0fa4c34a1 conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1
+2026-08-16 01:25:03,037 | INFO | request_id=0613def9-bb16-4f63-8db3-22a0fa4c34a1 method=POST path=/chat status=200 latency=2.088s
+2026-08-16 01:25:35,819 | INFO | chat_request request_id=192f6602-7dfd-4c00-af22-ec1223c3caad conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:25:35,821 | INFO | user_message_saved request_id=192f6602-7dfd-4c00-af22-ec1223c3caad conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:25:35,821 | INFO | conversation_history_loaded request_id=192f6602-7dfd-4c00-af22-ec1223c3caad conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1 messages=3
+2026-08-16 01:25:35,822 | INFO | llm_request request_id=192f6602-7dfd-4c00-af22-ec1223c3caad provider=gemini model=gemini-2.5-flash messages=4
+2026-08-16 01:25:36,857 | INFO | llm_response request_id=192f6602-7dfd-4c00-af22-ec1223c3caad provider=gemini model=gemini-2.5-flash latency=1.035s
+2026-08-16 01:25:36,857 | INFO | llm_response_received request_id=192f6602-7dfd-4c00-af22-ec1223c3caad conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:25:36,858 | INFO | assistant_message_saved request_id=192f6602-7dfd-4c00-af22-ec1223c3caad conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:25:36,858 | INFO | request_id=192f6602-7dfd-4c00-af22-ec1223c3caad method=POST path=/chat status=200 latency=1.040s
+2026-08-16 01:25:53,769 | INFO | chat_request request_id=7bb2e70f-7866-4574-908b-b7368ebec0d6 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:25:53,771 | INFO | user_message_saved request_id=7bb2e70f-7866-4574-908b-b7368ebec0d6 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:25:53,772 | INFO | conversation_history_loaded request_id=7bb2e70f-7866-4574-908b-b7368ebec0d6 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1 messages=5
+2026-08-16 01:25:53,772 | INFO | llm_request request_id=7bb2e70f-7866-4574-908b-b7368ebec0d6 provider=gemini model=gemini-2.5-flash messages=6
+2026-08-16 01:25:54,953 | INFO | llm_response request_id=7bb2e70f-7866-4574-908b-b7368ebec0d6 provider=gemini model=gemini-2.5-flash latency=1.181s
+2026-08-16 01:25:54,954 | INFO | llm_response_received request_id=7bb2e70f-7866-4574-908b-b7368ebec0d6 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:25:54,956 | INFO | assistant_message_saved request_id=7bb2e70f-7866-4574-908b-b7368ebec0d6 conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:25:54,957 | INFO | request_id=7bb2e70f-7866-4574-908b-b7368ebec0d6 method=POST path=/chat status=200 latency=1.189s
+2026-08-16 01:26:10,793 | INFO | chat_request request_id=16114aff-8b04-463d-b384-1f613e45f5aa conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1
+2026-08-16 01:26:10,795 | INFO | user_message_saved request_id=16114aff-8b04-463d-b384-1f613e45f5aa conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1
+2026-08-16 01:26:10,796 | INFO | conversation_history_loaded request_id=16114aff-8b04-463d-b384-1f613e45f5aa conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1 messages=3
+2026-08-16 01:26:10,797 | INFO | llm_request request_id=16114aff-8b04-463d-b384-1f613e45f5aa provider=gemini model=gemini-2.5-flash messages=4
+2026-08-16 01:26:12,448 | INFO | llm_response request_id=16114aff-8b04-463d-b384-1f613e45f5aa provider=gemini model=gemini-2.5-flash latency=1.651s
+2026-08-16 01:26:12,448 | INFO | llm_response_received request_id=16114aff-8b04-463d-b384-1f613e45f5aa conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1
+2026-08-16 01:26:12,449 | INFO | assistant_message_saved request_id=16114aff-8b04-463d-b384-1f613e45f5aa conversation_id=a3be97d2-7462-4e45-64fc-2d0fbbfcd1c1
+2026-08-16 01:26:12,449 | INFO | request_id=16114aff-8b04-463d-b384-1f613e45f5aa method=POST path=/chat status=200 latency=1.657s
+2026-08-16 01:26:19,070 | INFO | chat_request request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:26:19,072 | INFO | user_message_saved request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:26:19,072 | INFO | conversation_history_loaded request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1 messages=7
+2026-08-16 01:26:19,073 | INFO | llm_request request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af provider=gemini model=gemini-2.5-flash messages=8
+2026-08-16 01:26:20,598 | INFO | llm_response request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af provider=gemini model=gemini-2.5-flash latency=1.525s
+2026-08-16 01:26:20,598 | INFO | llm_response_received request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:26:20,599 | INFO | assistant_message_saved request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
+2026-08-16 01:26:20,600 | INFO | request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af method=POST path=/chat status=200 latency=1.530s

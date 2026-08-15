@@ -7,9 +7,7 @@ from app.schemas.chat import (
     ChatRequest,
     ChatResponse,
 )
-from app.services.conversation_service import (
-    ConversationService,
-)
+from app.services.conversation_service import ConversationService
 
 from app.services.llm import (
     generate_response,
