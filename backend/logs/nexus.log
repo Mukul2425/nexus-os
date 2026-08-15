@@ -274,3 +274,46 @@ google.genai.errors.ClientError: 400 INVALID_ARGUMENT. {'error': {'code': 400, '
 2026-08-16 01:26:20,598 | INFO | llm_response_received request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
 2026-08-16 01:26:20,599 | INFO | assistant_message_saved request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af conversation_id=a3be97d2-7462-4e45-94fc-2d0fbbfcd1c1
 2026-08-16 01:26:20,600 | INFO | request_id=e9aa35ac-2156-4d7b-905f-5bdb011cb0af method=POST path=/chat status=200 latency=1.530s
+2026-08-16 01:35:08,920 | INFO | request_id=da7b75d8-63cc-48f6-b37e-39d5fabda918 method=GET path=/docs status=200 latency=0.001s
+2026-08-16 01:35:08,977 | INFO | request_id=678a9717-c447-46d1-9a0c-ed4badde2a44 method=GET path=/openapi.json status=200 latency=0.007s
+2026-08-16 01:35:29,931 | INFO | request_id=3c02c1a0-504e-44ed-a8cc-5c95a495accd method=POST path=/conversation status=200 latency=0.005s
+2026-08-16 01:35:49,527 | INFO | chat_request request_id=8ffc85ca-2d30-4cf3-983d-17f142c7d03b conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:35:49,529 | INFO | user_message_saved request_id=8ffc85ca-2d30-4cf3-983d-17f142c7d03b conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:35:49,530 | INFO | conversation_history_loaded request_id=8ffc85ca-2d30-4cf3-983d-17f142c7d03b conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321 messages=1
+2026-08-16 01:35:49,530 | INFO | llm_request request_id=8ffc85ca-2d30-4cf3-983d-17f142c7d03b provider=gemini model=gemini-2.5-flash messages=2
+2026-08-16 01:35:51,751 | INFO | llm_response request_id=8ffc85ca-2d30-4cf3-983d-17f142c7d03b provider=gemini model=gemini-2.5-flash latency=2.221s
+2026-08-16 01:35:51,751 | INFO | llm_response_received request_id=8ffc85ca-2d30-4cf3-983d-17f142c7d03b conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:35:51,754 | INFO | assistant_message_saved request_id=8ffc85ca-2d30-4cf3-983d-17f142c7d03b conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:35:51,754 | INFO | request_id=8ffc85ca-2d30-4cf3-983d-17f142c7d03b method=POST path=/chat status=200 latency=2.230s
+2026-08-16 01:36:00,015 | INFO | chat_request request_id=89d37eac-0ccb-4206-8fb3-2f5ba0147de4 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:36:00,017 | INFO | user_message_saved request_id=89d37eac-0ccb-4206-8fb3-2f5ba0147de4 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:36:00,017 | INFO | conversation_history_loaded request_id=89d37eac-0ccb-4206-8fb3-2f5ba0147de4 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321 messages=3
+2026-08-16 01:36:00,017 | INFO | llm_request request_id=89d37eac-0ccb-4206-8fb3-2f5ba0147de4 provider=gemini model=gemini-2.5-flash messages=4
+2026-08-16 01:36:02,571 | INFO | llm_response request_id=89d37eac-0ccb-4206-8fb3-2f5ba0147de4 provider=gemini model=gemini-2.5-flash latency=2.554s
+2026-08-16 01:36:02,571 | INFO | llm_response_received request_id=89d37eac-0ccb-4206-8fb3-2f5ba0147de4 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:36:02,572 | INFO | assistant_message_saved request_id=89d37eac-0ccb-4206-8fb3-2f5ba0147de4 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:36:02,573 | INFO | request_id=89d37eac-0ccb-4206-8fb3-2f5ba0147de4 method=POST path=/chat status=200 latency=2.558s
+2026-08-16 01:36:34,785 | INFO | stream_chat_request request_id=3b2c7326-a616-4e0d-a1b6-8005482919f3 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:36:34,788 | INFO | stream_user_message_saved request_id=3b2c7326-a616-4e0d-a1b6-8005482919f3 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:36:34,788 | INFO | stream_conversation_history_loaded request_id=3b2c7326-a616-4e0d-a1b6-8005482919f3 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321 messages=5
+2026-08-16 01:36:34,789 | INFO | llm_stream_start request_id=3b2c7326-a616-4e0d-a1b6-8005482919f3 provider=gemini model=gemini-2.5-flash messages=6
+2026-08-16 01:36:37,419 | INFO | request_id=3b2c7326-a616-4e0d-a1b6-8005482919f3 method=POST path=/chat/stream status=200 latency=2.636s
+2026-08-16 01:36:39,622 | INFO | llm_stream_complete request_id=3b2c7326-a616-4e0d-a1b6-8005482919f3 provider=gemini model=gemini-2.5-flash chunks=11 latency=4.833s
+2026-08-16 01:36:39,622 | INFO | stream_llm_response_complete request_id=3b2c7326-a616-4e0d-a1b6-8005482919f3 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321 chunks=11 response_length=2193
+2026-08-16 01:36:39,623 | INFO | stream_assistant_message_saved request_id=3b2c7326-a616-4e0d-a1b6-8005482919f3 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:37:09,529 | INFO | stream_chat_request request_id=8c7c0f7e-4a53-41c9-ba98-0734b2154ac0 conversation_id=0e842b81-...
+2026-08-16 01:37:09,530 | INFO | stream_user_message_saved request_id=8c7c0f7e-4a53-41c9-ba98-0734b2154ac0 conversation_id=0e842b81-...
+2026-08-16 01:37:09,530 | INFO | stream_conversation_history_loaded request_id=8c7c0f7e-4a53-41c9-ba98-0734b2154ac0 conversation_id=0e842b81-... messages=1
+2026-08-16 01:37:09,530 | INFO | llm_stream_start request_id=8c7c0f7e-4a53-41c9-ba98-0734b2154ac0 provider=gemini model=gemini-2.5-flash messages=2
+2026-08-16 01:37:11,481 | INFO | request_id=8c7c0f7e-4a53-41c9-ba98-0734b2154ac0 method=POST path=/chat/stream status=200 latency=1.953s
+2026-08-16 01:37:18,880 | INFO | llm_stream_complete request_id=8c7c0f7e-4a53-41c9-ba98-0734b2154ac0 provider=gemini model=gemini-2.5-flash chunks=33 latency=9.349s
+2026-08-16 01:37:18,880 | INFO | stream_llm_response_complete request_id=8c7c0f7e-4a53-41c9-ba98-0734b2154ac0 conversation_id=0e842b81-... chunks=33 response_length=7257
+2026-08-16 01:37:18,881 | INFO | stream_assistant_message_saved request_id=8c7c0f7e-4a53-41c9-ba98-0734b2154ac0 conversation_id=0e842b81-...
+2026-08-16 01:37:53,768 | INFO | stream_chat_request request_id=24a0e5da-849e-4a76-ba8f-d10ac27dfd29 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:37:53,769 | INFO | stream_user_message_saved request_id=24a0e5da-849e-4a76-ba8f-d10ac27dfd29 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
+2026-08-16 01:37:53,770 | INFO | stream_conversation_history_loaded request_id=24a0e5da-849e-4a76-ba8f-d10ac27dfd29 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321 messages=7
+2026-08-16 01:37:53,770 | INFO | llm_stream_start request_id=24a0e5da-849e-4a76-ba8f-d10ac27dfd29 provider=gemini model=gemini-2.5-flash messages=8
+2026-08-16 01:37:55,142 | INFO | request_id=24a0e5da-849e-4a76-ba8f-d10ac27dfd29 method=POST path=/chat/stream status=200 latency=1.375s
+2026-08-16 01:37:55,142 | INFO | llm_stream_complete request_id=24a0e5da-849e-4a76-ba8f-d10ac27dfd29 provider=gemini model=gemini-2.5-flash chunks=1 latency=1.372s
+2026-08-16 01:37:55,142 | INFO | stream_llm_response_complete request_id=24a0e5da-849e-4a76-ba8f-d10ac27dfd29 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321 chunks=1 response_length=58
+2026-08-16 01:37:55,143 | INFO | stream_assistant_message_saved request_id=24a0e5da-849e-4a76-ba8f-d10ac27dfd29 conversation_id=f277a3d8-90b2-41d1-90cb-a8967f648321
