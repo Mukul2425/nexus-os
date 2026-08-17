@@ -4,3 +4,4 @@ Status:
 🟡 In Progress
 
 Backend Foundation ✅
+Logging and Observability ✅

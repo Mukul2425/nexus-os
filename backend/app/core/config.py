@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     APP_NAME: str = "Nexus Backend"
-    VERSION: str = "0.2.0"
+    VERSION: str = "0.3.0"
     LLM_PROVIDER: str = "gemini"
     GEMINI_API_KEY: str
     DATABASE_URL: str = "sqlite:///./nexus.db"

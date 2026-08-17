@@ -19,7 +19,7 @@ v0.1.0
 - Environment-based configuration
 - LLM service implementation
 
-## v0.1.0 - Backend Foundation
+## v0.3.0 - Logging & Observability
 
 ### Added
 - FastAPI backend
@@ -27,4 +27,5 @@ v0.1.0
 - Chat endpoint
 - Gemini integration
 - Multi-turn conversations
-
+- Session Memory Management
+- Logging 
