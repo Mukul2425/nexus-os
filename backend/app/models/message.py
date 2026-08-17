@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import ForeignKey
 from sqlalchemy import DateTime
@@ -19,13 +20,20 @@ class Message(Base):
     )
 
     conversation_id: Mapped[str] = mapped_column(
-        ForeignKey("conversations.id")
+        ForeignKey("conversations.id"),
+        nullable=False,
     )
 
-    role: Mapped[str]
+    role: Mapped[str] = mapped_column(
+        nullable=False,
+    )
 
-    content: Mapped[str]
+    content: Mapped[str] = mapped_column(
+        nullable=False,
+    )
 
-    created_at: Mapped[DateTime] = mapped_column(
-        server_default=func.now()
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False,
     )

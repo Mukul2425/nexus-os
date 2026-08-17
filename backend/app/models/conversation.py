@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped
@@ -17,11 +18,15 @@ class Conversation(Base):
         default=lambda: str(uuid.uuid4()),
     )
 
-    created_at: Mapped[DateTime] = mapped_column(
-        server_default=func.now()
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False,
     )
 
-    updated_at: Mapped[DateTime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
         server_default=func.now(),
         onupdate=func.now(),
+        nullable=False,
     )

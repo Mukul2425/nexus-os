@@ -6,7 +6,8 @@
 - [x] LLM integration
 - [ ] Frontend
 - [x] Streaming
-
+- [x] Logging
+- [x] Session Management
 
 Backend Foundation
 
