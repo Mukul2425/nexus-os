@@ -17,3 +17,15 @@ class ConversationRepository:
         self.db.refresh(conversation)
 
         return conversation
+
+    def get(self, conversation_id):
+
+        return (
+            self.db.query(Conversation)
+            .filter(
+                Conversation.id == conversation_id
+            )
+            .first()
+        )
+
+    

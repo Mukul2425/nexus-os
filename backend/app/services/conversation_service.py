@@ -13,6 +13,7 @@ from app.services.llm import (
 from app.logging.logger import logger
 from app.logging.context import get_request_id
 
+from app.core.exceptions import ConversationNotFoundError
 
 class ConversationService:
 
@@ -30,8 +31,13 @@ class ConversationService:
         conversation_id: str,
         message: str,
     ):
-
         request_id = get_request_id()
+
+        conversation = self.conversation_repository.get(conversation_id)
+        if conversation is None:
+            raise ConversationNotFoundError()
+
+        
 
         logger.info(
             "chat_request request_id=%s conversation_id=%s",
@@ -106,12 +112,31 @@ class ConversationService:
     # ---------------------------------------------------------
 
     async def stream_chat(
-        self,
-        conversation_id: str,
-        message: str,
-    ) -> AsyncGenerator[str, None]:
+    self,
+    conversation_id: str,
+    message: str,
+) -> AsyncGenerator[str, None]:
 
         request_id = get_request_id()
+
+        # ---------------------------------------------------------
+        # Validate conversation
+        # ---------------------------------------------------------
+
+        conversation = self.conversation_repository.get(
+            conversation_id
+        )
+
+        if conversation is None:
+
+            logger.warning(
+                "stream_conversation_not_found "
+                "request_id=%s conversation_id=%s",
+                request_id,
+                conversation_id,
+            )
+
+            raise ConversationNotFoundError()
 
         logger.info(
             "stream_chat_request "
@@ -120,9 +145,9 @@ class ConversationService:
             conversation_id,
         )
 
-        # -----------------------------------------------------
-        # 1. Save user's message
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # Save user message
+        # ---------------------------------------------------------
 
         self.message_repository.save(
             conversation_id,
@@ -137,9 +162,9 @@ class ConversationService:
             conversation_id,
         )
 
-        # -----------------------------------------------------
-        # 2. Load conversation history
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # Load conversation history
+        # ---------------------------------------------------------
 
         history = self.message_repository.get_messages(
             conversation_id
@@ -153,9 +178,9 @@ class ConversationService:
             len(history),
         )
 
-        # -----------------------------------------------------
-        # 3. Convert DB messages to ChatMessage
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # Convert database messages to ChatMessage
+        # ---------------------------------------------------------
 
         messages = [
             ChatMessage(
@@ -165,9 +190,9 @@ class ConversationService:
             for m in history
         ]
 
-        # -----------------------------------------------------
-        # 4. Stream response from LLM
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # Stream LLM response
+        # ---------------------------------------------------------
 
         response_chunks = []
 
@@ -177,28 +202,30 @@ class ConversationService:
 
                 response_chunks.append(chunk)
 
-                # Immediately send chunk to client
+                # Send chunk immediately to client
                 yield chunk
 
-            # -------------------------------------------------
-            # 5. Reconstruct complete assistant response
-            # -------------------------------------------------
+            # -----------------------------------------------------
+            # Reconstruct complete response
+            # -----------------------------------------------------
 
             answer = "".join(response_chunks)
 
             logger.info(
                 "stream_llm_response_complete "
-                "request_id=%s conversation_id=%s "
-                "chunks=%d response_length=%d",
+                "request_id=%s "
+                "conversation_id=%s "
+                "chunks=%d "
+                "response_length=%d",
                 request_id,
                 conversation_id,
                 len(response_chunks),
                 len(answer),
             )
 
-            # -------------------------------------------------
-            # 6. Save complete assistant response
-            # -------------------------------------------------
+            # -----------------------------------------------------
+            # Save assistant response
+            # -----------------------------------------------------
 
             self.message_repository.save(
                 conversation_id,
@@ -217,7 +244,8 @@ class ConversationService:
 
             logger.exception(
                 "stream_chat_failed "
-                "request_id=%s conversation_id=%s "
+                "request_id=%s "
+                "conversation_id=%s "
                 "chunks=%d",
                 request_id,
                 conversation_id,

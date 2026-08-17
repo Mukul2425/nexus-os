@@ -31,3 +31,12 @@ typing_extensions==4.16.0
 urllib3==2.7.0
 uvicorn==0.52.0
 websockets==16.1.1
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+sqlalchemy
+google-genai
+python-dotenv
+pytest
+httpx
