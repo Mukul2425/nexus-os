@@ -1,7 +1,17 @@
-Phase 0
+Phase 4
 
 Status:
 🟡 In Progress
 
-Backend Foundation ✅
-Logging and Observability ✅
+v0.1.0
+Backend Foundation
+        ↓
+v0.2.0
+Conversation Management
+        ↓
+v0.3.0
+Logging & Observability
+        ↓
+v0.4.0
+Production Hardening
+        ↓
