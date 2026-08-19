@@ -6,7 +6,7 @@ from google.genai import types
 
 from app.core.config import settings
 from app.schemas.chat import ChatMessage
-
+from app.core.exceptions import LLMProviderError
 from app.logging.logger import logger
 from app.logging.context import get_request_id
 
@@ -112,22 +112,23 @@ def generate_response(
 
         return response.text
 
-    except Exception:
+    except Exception as exc:
 
         latency = perf_counter() - start
 
         logger.exception(
-            "llm_error "
-            "request_id=%s "
-            "provider=gemini "
-            "model=%s "
-            "latency=%.3fs",
-            request_id,
-            MODEL_NAME,
-            latency,
+        "llm_error "
+        "request_id=%s "
+        "provider=gemini "
+        "model=%s "
+        "latency=%.3fs",
+        request_id,
+        MODEL_NAME,
+        latency,
         )
 
-        raise
+        raise LLMProviderError() from exc
+    
 async def stream_response(
     messages: list[ChatMessage],
 ) -> AsyncGenerator[str, None]:
@@ -183,7 +184,7 @@ async def stream_response(
             latency,
         )
 
-    except Exception:
+    except Exception as exc:
 
         latency = perf_counter() - start
 
@@ -200,4 +201,4 @@ async def stream_response(
             latency,
         )
 
-        raise
+        raise LLMProviderError() from exc
