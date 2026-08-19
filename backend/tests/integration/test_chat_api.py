@@ -35,3 +35,12 @@ def test_chat(client):
     }
 
     mock_generate.assert_called_once()
+    mock_generate.assert_called_once()
+    args, kwargs = mock_generate.call_args
+
+    messages = args[0]
+
+    assert messages[-1].content == "Hello"
+    assert messages[-1].role == "user"
+
+    

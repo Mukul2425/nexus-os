@@ -1,10 +1,7 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from app.core.exceptions import (
-    NexusException,
-)
-
+from app.core.exceptions import NexusException
 from app.logging.context import get_request_id
 from app.logging.logger import logger
 
@@ -26,16 +23,8 @@ async def nexus_exception_handler(
         exc.message,
     )
 
-    status_code = 500
-
-    if exc.code == "CONVERSATION_NOT_FOUND":
-        status_code = 404
-
-    elif exc.code == "LLM_PROVIDER_ERROR":
-        status_code = 502
-
     return JSONResponse(
-        status_code=status_code,
+        status_code=exc.status_code,
         content={
             "error": {
                 "code": exc.code,

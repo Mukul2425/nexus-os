@@ -184,7 +184,7 @@ async def stream_response(
             latency,
         )
 
-    except Exception:
+    except Exception as exc:
 
         latency = perf_counter() - start
 
@@ -201,4 +201,4 @@ async def stream_response(
             latency,
         )
 
-        raise
+        raise LLMProviderError() from exc

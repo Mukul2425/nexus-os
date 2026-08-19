@@ -7,9 +7,11 @@ class NexusException(Exception):
         self,
         code: str,
         message: str,
+        status_code: int = 500,
     ):
         self.code = code
         self.message = message
+        self.status_code = status_code
 
         super().__init__(message)
 
@@ -23,6 +25,7 @@ class LLMProviderError(NexusException):
         super().__init__(
             code="LLM_PROVIDER_ERROR",
             message=message,
+            status_code=502,
         )
 
 
@@ -32,4 +35,5 @@ class ConversationNotFoundError(NexusException):
         super().__init__(
             code="CONVERSATION_NOT_FOUND",
             message="Conversation not found",
+            status_code=404,
         )
