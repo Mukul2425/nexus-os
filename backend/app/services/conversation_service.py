@@ -5,22 +5,24 @@ from app.repositories.conversation_repository import ConversationRepository
 
 from app.schemas.chat import ChatMessage
 
-from app.services.llm import (
-    generate_response,
-    stream_response,
-)
+from app.services.llm.provider import LLMProvider
 
 from app.logging.logger import logger
 from app.logging.context import get_request_id
 
 from app.core.exceptions import ConversationNotFoundError
 
+
 class ConversationService:
 
-    def __init__(self, db):
-
+    def __init__(
+        self,
+        db,
+        llm_provider: LLMProvider,
+    ):
         self.conversation_repository = ConversationRepository(db)
         self.message_repository = MessageRepository(db)
+        self.llm_provider = llm_provider
 
     # ---------------------------------------------------------
     # Normal chat
@@ -30,14 +32,16 @@ class ConversationService:
         self,
         conversation_id: str,
         message: str,
-    ):
+    ) -> str:
+
         request_id = get_request_id()
 
-        conversation = self.conversation_repository.get(conversation_id)
+        conversation = self.conversation_repository.get(
+            conversation_id
+        )
+
         if conversation is None:
             raise ConversationNotFoundError()
-
-        
 
         logger.info(
             "chat_request request_id=%s conversation_id=%s",
@@ -45,18 +49,11 @@ class ConversationService:
             conversation_id,
         )
 
-        # Save user's message
+        # Save user message
         self.message_repository.save(
             conversation_id,
             "user",
             message,
-        )
-
-        logger.info(
-            "user_message_saved "
-            "request_id=%s conversation_id=%s",
-            request_id,
-            conversation_id,
         )
 
         # Load conversation history
@@ -64,15 +61,6 @@ class ConversationService:
             conversation_id
         )
 
-        logger.info(
-            "conversation_history_loaded "
-            "request_id=%s conversation_id=%s messages=%d",
-            request_id,
-            conversation_id,
-            len(history),
-        )
-
-        # Convert database messages into ChatMessage objects
         messages = [
             ChatMessage(
                 role=m.role,
@@ -81,8 +69,10 @@ class ConversationService:
             for m in history
         ]
 
-        # Call LLM
-        answer = generate_response(messages)
+        # LLM abstraction
+        answer = self.llm_provider.generate(
+            messages
+        )
 
         logger.info(
             "llm_response_received "
@@ -112,21 +102,16 @@ class ConversationService:
     # ---------------------------------------------------------
 
     async def stream_chat(
-    self,
-    conversation_id: str,
-    message: str,
-) -> AsyncGenerator[str, None]:
+        self,
+        conversation_id: str,
+        message: str,
+    ) -> AsyncGenerator[str, None]:
 
         request_id = get_request_id()
-
-        # ---------------------------------------------------------
-        # Validate conversation
-        # ---------------------------------------------------------
 
         conversation = self.conversation_repository.get(
             conversation_id
         )
-        
 
         if conversation is None:
 
@@ -146,42 +131,17 @@ class ConversationService:
             conversation_id,
         )
 
-        # ---------------------------------------------------------
         # Save user message
-        # ---------------------------------------------------------
-
         self.message_repository.save(
             conversation_id,
             "user",
             message,
         )
 
-        logger.info(
-            "stream_user_message_saved "
-            "request_id=%s conversation_id=%s",
-            request_id,
-            conversation_id,
-        )
-
-        # ---------------------------------------------------------
-        # Load conversation history
-        # ---------------------------------------------------------
-
+        # Load history
         history = self.message_repository.get_messages(
             conversation_id
         )
-
-        logger.info(
-            "stream_conversation_history_loaded "
-            "request_id=%s conversation_id=%s messages=%d",
-            request_id,
-            conversation_id,
-            len(history),
-        )
-
-        # ---------------------------------------------------------
-        # Convert database messages to ChatMessage
-        # ---------------------------------------------------------
 
         messages = [
             ChatMessage(
@@ -191,25 +151,20 @@ class ConversationService:
             for m in history
         ]
 
-        # ---------------------------------------------------------
-        # Stream LLM response
-        # ---------------------------------------------------------
-
         response_chunks = []
 
         try:
 
-            async for chunk in stream_response(messages):
+            async for chunk in self.llm_provider.stream(
+                messages
+            ):
 
                 response_chunks.append(chunk)
 
-                # Send chunk immediately to client
+                # Immediately send chunk to client
                 yield chunk
 
-            # -----------------------------------------------------
             # Reconstruct complete response
-            # -----------------------------------------------------
-
             answer = "".join(response_chunks)
 
             logger.info(
@@ -224,10 +179,7 @@ class ConversationService:
                 len(answer),
             )
 
-            # -----------------------------------------------------
-            # Save assistant response
-            # -----------------------------------------------------
-
+            # Save complete assistant response
             self.message_repository.save(
                 conversation_id,
                 "assistant",

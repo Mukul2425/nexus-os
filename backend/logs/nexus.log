@@ -371,3 +371,23 @@ google.genai.errors.ClientError: 400 INVALID_ARGUMENT. {'error': {'code': 400, '
 2026-08-19 17:45:54,801 | INFO | request_id=c01dd877-1360-4124-9414-f827e6dc6c30 method=POST path=/chat status=200 latency=0.002s
 2026-08-19 17:45:54,804 | ERROR | application_error request_id=c27aabd5-81c1-4865-b9ee-986d0d807dc5 code=CONVERSATION_NOT_FOUND message=Conversation not found
 2026-08-19 17:45:54,804 | INFO | request_id=c27aabd5-81c1-4865-b9ee-986d0d807dc5 method=POST path=/chat status=404 latency=0.001s
+2026-08-21 14:37:24,247 | INFO | request_id=0b186c3f-4413-4518-afa2-03a974825d6c method=POST path=/conversation status=200 latency=0.004s
+2026-08-21 14:37:24,249 | INFO | chat_request request_id=8a1f8f2c-eb35-4893-9771-5527ea97df89 conversation_id=4cc251b9-abea-4f68-8aee-224a58373691
+2026-08-21 14:37:24,250 | INFO | llm_response_received request_id=8a1f8f2c-eb35-4893-9771-5527ea97df89 conversation_id=4cc251b9-abea-4f68-8aee-224a58373691
+2026-08-21 14:37:24,250 | INFO | assistant_message_saved request_id=8a1f8f2c-eb35-4893-9771-5527ea97df89 conversation_id=4cc251b9-abea-4f68-8aee-224a58373691
+2026-08-21 14:37:24,251 | INFO | request_id=8a1f8f2c-eb35-4893-9771-5527ea97df89 method=POST path=/chat status=200 latency=0.003s
+2026-08-21 14:37:24,255 | INFO | request_id=a9f4502f-8214-4930-b3c6-0da7f926b922 method=POST path=/conversation status=200 latency=0.001s
+2026-08-21 14:37:24,258 | INFO | request_id=f1b160e1-7e0c-43b7-9245-70700cdcf887 method=POST path=/conversation status=200 latency=0.001s
+2026-08-21 14:37:24,259 | INFO | chat_request request_id=748ae400-0bd2-46d6-86d7-5db3b162cf36 conversation_id=837ec286-5326-4386-9392-5e739f16c70d
+2026-08-21 14:37:24,260 | ERROR | application_error request_id=748ae400-0bd2-46d6-86d7-5db3b162cf36 code=LLM_PROVIDER_ERROR message=Unable to generate a response
+2026-08-21 14:37:24,260 | INFO | request_id=748ae400-0bd2-46d6-86d7-5db3b162cf36 method=POST path=/chat status=502 latency=0.001s
+2026-08-21 14:37:24,288 | ERROR | application_error request_id=44b2eb57-1309-45a6-8f36-32e7794aa5f2 code=CONVERSATION_NOT_FOUND message=Conversation not found
+2026-08-21 14:37:24,288 | INFO | request_id=44b2eb57-1309-45a6-8f36-32e7794aa5f2 method=POST path=/chat status=404 latency=0.026s
+2026-08-21 14:37:24,291 | INFO | chat_request request_id=- conversation_id=6dc9d1bf-eb07-4dba-a934-1a632e17566d
+2026-08-21 14:37:24,291 | INFO | llm_response_received request_id=- conversation_id=6dc9d1bf-eb07-4dba-a934-1a632e17566d
+2026-08-21 14:37:24,291 | INFO | assistant_message_saved request_id=- conversation_id=6dc9d1bf-eb07-4dba-a934-1a632e17566d
+2026-08-21 14:37:24,293 | INFO | chat_request request_id=- conversation_id=0839484d-f697-4a21-9f0c-d7da069e4495
+2026-08-21 14:37:24,293 | INFO | llm_response_received request_id=- conversation_id=0839484d-f697-4a21-9f0c-d7da069e4495
+2026-08-21 14:37:24,293 | INFO | assistant_message_saved request_id=- conversation_id=0839484d-f697-4a21-9f0c-d7da069e4495
+2026-08-21 14:37:24,301 | INFO | llm_request request_id=- provider=gemini model=gemini-2.5-flash messages=1
+2026-08-21 14:37:24,301 | INFO | llm_response request_id=- provider=gemini model=gemini-2.5-flash latency=0.000s

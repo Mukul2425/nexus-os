@@ -2,6 +2,8 @@ from unittest.mock import patch
 
 from app.core.exceptions import ConversationNotFoundError
 
+from unittest.mock import MagicMock, patch
+
 from app.core.exceptions import LLMProviderError
 
 
@@ -16,9 +18,15 @@ def test_llm_provider_error(client):
         .json()["conversation_id"]
     )
 
+    mock_provider = MagicMock()
+
+    mock_provider.generate.side_effect = (
+        LLMProviderError()
+    )
+
     with patch(
-        "app.services.conversation_service.generate_response",
-        side_effect=LLMProviderError(),
+        "app.api.chat.create_llm_provider",
+        return_value=mock_provider,
     ):
 
         response = client.post(
@@ -31,15 +39,17 @@ def test_llm_provider_error(client):
 
     assert response.status_code == 502
 
-    assert response.json()["error"]["code"] == (
+    data = response.json()
+
+    assert data["error"]["code"] == (
         "LLM_PROVIDER_ERROR"
     )
 
-    assert response.json()["error"]["message"] == (
+    assert data["error"]["message"] == (
         "Unable to generate a response"
     )
 
-    assert "request_id" in response.json()["error"]
+    assert "request_id" in data["error"]
 
 
     

@@ -13,6 +13,8 @@ from app.services.conversation_service import (
     ConversationService,
 )
 
+from app.services.llm.factory import create_llm_provider
+
 
 router = APIRouter()
 
@@ -26,7 +28,12 @@ def chat(
     db: Session = Depends(get_db),
 ):
 
-    service = ConversationService(db)
+    llm_provider = create_llm_provider()
+
+    service = ConversationService(
+        db,
+        llm_provider,
+    )
 
     response = service.chat(
         request.conversation_id,
@@ -44,7 +51,12 @@ async def chat_stream(
     db: Session = Depends(get_db),
 ):
 
-    service = ConversationService(db)
+    llm_provider = create_llm_provider()
+
+    service = ConversationService(
+        db,
+        llm_provider,
+    )
 
     return StreamingResponse(
         service.stream_chat(

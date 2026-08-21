@@ -1,79 +1,56 @@
+from unittest.mock import MagicMock
 
-from unittest.mock import patch
+from app.services.conversation_service import ConversationService
 
-def test_chat_preserves_conversation_history(
-    client,
-):
 
-    conversation_response = client.post(
-        "/conversation"
+def test_chat_service(db):
+    mock_provider = MagicMock()
+
+    mock_provider.generate.return_value = "Hello Mukul!"
+
+    service = ConversationService(
+        db,
+        mock_provider,
     )
 
-    conversation_id = (
-        conversation_response
-        .json()["conversation_id"]
+    # Create conversation
+    conversation = service.conversation_repository.create()
+
+    response = service.chat(
+        conversation.id,
+        "Hello",
     )
 
-    with patch(
-        "app.services.conversation_service.generate_response"
-    ) as mock_generate:
+    assert response == "Hello Mukul!"
 
-        mock_generate.side_effect = [
-            "Hello Mukul!",
-            "Your name is Mukul.",
-        ]
+    mock_provider.generate.assert_called_once()
 
-        first = client.post(
-            "/chat",
-            json={
-                "conversation_id": conversation_id,
-                "message": "My name is Mukul.",
-            },
-        )
 
-        second = client.post(
-            "/chat",
-            json={
-                "conversation_id": conversation_id,
-                "message": "What is my name?",
-            },
-        )
+def test_chat_service_saves_messages(db):
+    mock_provider = MagicMock()
 
-    assert first.status_code == 200
-    assert second.status_code == 200
+    mock_provider.generate.return_value = "Hello!"
 
-    assert (
-        second.json()["response"]
-        == "Your name is Mukul."
+    service = ConversationService(
+        db,
+        mock_provider,
     )
 
-    assert mock_generate.call_count == 2
+    conversation = service.conversation_repository.create()
 
-def test_chat_invalid_conversation(client):
-
-    response = client.post(
-        "/chat",
-        json={
-            "conversation_id": (
-                "does-not-exist"
-            ),
-            "message": "Hello",
-        },
+    service.chat(
+        conversation.id,
+        "My name is Mukul",
     )
 
-    assert response.status_code == 404
-
-    data = response.json()
-
-    assert data["error"]["code"] == (
-        "CONVERSATION_NOT_FOUND"
+    messages = service.message_repository.get_messages(
+        conversation.id
     )
 
-    assert data["error"]["message"] == (
-        "Conversation not found"
-    )
+    assert len(messages) == 2
 
-    assert (
-        "request_id"
-        in data["error"]
-    )
+    assert messages[0].role == "user"
+    assert messages[0].content == "My name is Mukul"
+
+    assert messages[1].role == "assistant"
+    assert messages[1].content == "Hello!"
