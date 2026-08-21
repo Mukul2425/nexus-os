@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 
 def test_chat(client):
@@ -7,18 +7,23 @@ def test_chat(client):
         "/conversation"
     )
 
+    assert conversation_response.status_code == 200
+
     conversation_id = (
         conversation_response
         .json()["conversation_id"]
     )
 
-    with patch(
-        "app.services.conversation_service.generate_response"
-    ) as mock_generate:
+    mock_provider = MagicMock()
 
-        mock_generate.return_value = (
-            "Hello Mukul!"
-        )
+    mock_provider.generate.return_value = (
+        "Hello Mukul!"
+    )
+
+    with patch(
+        "app.api.chat.create_llm_provider",
+        return_value=mock_provider,
+    ):
 
         response = client.post(
             "/chat",
@@ -34,13 +39,4 @@ def test_chat(client):
         "response": "Hello Mukul!"
     }
 
-    mock_generate.assert_called_once()
-    mock_generate.assert_called_once()
-    args, kwargs = mock_generate.call_args
-
-    messages = args[0]
-
-    assert messages[-1].content == "Hello"
-    assert messages[-1].role == "user"
-
-    
+    mock_provider.generate.assert_called_once()

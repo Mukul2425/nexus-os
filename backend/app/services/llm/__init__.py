@@ -1,9 +1,6 @@
-from .service import (
-    generate_response,
-    stream_response,
-)
+from app.services.llm.service import LLMService
 
 __all__ = [
-    "generate_response",
-    "stream_response",
+    "LLMService",
 ]
+

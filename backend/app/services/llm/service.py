@@ -1,28 +1,35 @@
 from collections.abc import AsyncGenerator
 
-from app.prompts.chat import prepare_chat_messages
 from app.schemas.chat import ChatMessage
-
-from .gemini import (
-    generate_response as gemini_generate,
-    stream_response as gemini_stream,
-)
+from app.services.llm.factory import create_llm_provider
+from app.services.llm.provider import LLMProvider
 
 
-def generate_response(
-    messages: list[ChatMessage],
-) -> str:
+class LLMService:
 
-    prompt = prepare_chat_messages(messages)
+    def __init__(
+        self,
+        provider: LLMProvider | None = None,
+    ):
 
-    return gemini_generate(prompt)
+        self.provider = (
+            provider
+            if provider is not None
+            else create_llm_provider()
+        )
 
+    def generate(
+        self,
+        messages: list[ChatMessage],
+    ) -> str:
 
-async def stream_response(
-    messages: list[ChatMessage],
-) -> AsyncGenerator[str, None]:
+        return self.provider.generate(messages)
 
-    prompt = prepare_chat_messages(messages)
+    async def stream(
+        self,
+        messages: list[ChatMessage],
+    ) -> AsyncGenerator[str, None]:
 
-    async for chunk in gemini_stream(prompt):
-        yield chunk
+        async for chunk in self.provider.stream(messages):
+
+            yield chunk

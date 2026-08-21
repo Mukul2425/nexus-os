@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     )
 
     VERSION: str = Field(
-        default="0.4.0"
+        default="0.5.0"
     )
 
     LLM_PROVIDER: str = Field(

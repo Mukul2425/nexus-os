@@ -8,6 +8,10 @@
 - [x] Streaming
 - [x] Logging
 - [x] Session Management
+- [x] LLM Provider Abstraction
+- [x] Provider Factory
+- [x] Gemini Provider
+- [x] Streaming through LLM abstraction
 
 Backend Foundation
 
@@ -19,6 +23,8 @@ Backend Foundation
 
 ✔ Gemini Integration
 
+✔ LLM Abstraction
+
 ## Features
 
 ### Backend
@@ -29,6 +35,7 @@ Backend Foundation
 - UUID-based conversations
 - SQLite database
 - SQLAlchemy ORM
+
 
 ### LLM
 
@@ -58,6 +65,7 @@ Backend Foundation
 - Mocked LLM provider calls
 - API error handling tests
 
+## Architectural diagram after v0.4.0
 
                          Nexus Backend
                               │
@@ -102,3 +110,77 @@ Request ──► Logging Middleware
       │ Mocked LLM                    │
       │ Test Database                 │
       └───────────────────────────────┘
+
+
+
+
+## Architectural diagram after v0.5.0
+
+                         ┌─────────────────────┐
+                         │       Client        │
+                         └──────────┬──────────┘
+                                    │
+                         HTTP / REST / Streaming
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │     FastAPI API     │
+                         │                     │
+                         │ /conversation      │
+                         │ /chat              │
+                         │ /chat/stream       │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │ ConversationService │
+                         │                     │
+                         │ • history           │
+                         │ • persistence       │
+                         │ • prompt building   │
+                         │ • orchestration     │
+                         └───────┬───────┬─────┘
+                                 │       │
+                    ┌────────────┘       └─────────────┐
+                    ▼                                  ▼
+          ┌──────────────────┐              ┌─────────────────┐
+          │    Repositories  │              │  Prompt Builder │
+          │                  │              └─────────────────┘
+          │ ConversationRepo │
+          │ MessageRepo      │
+          └──────────────────┘
+                                 
+                                 │
+                                 ▼
+                         ┌─────────────────────┐
+                         │    LLMProvider      │
+                         │     Interface       │
+                         │                     │
+                         │ generate()          │
+                         │ stream()            │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Provider Factory  │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   GeminiProvider    │
+                         │                     │
+                         │ Gemini-specific     │
+                         │ implementation      │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                              Gemini API
+
+
+
+                ┌─────────────────────────────────────────┐
+                │           Cross-Cutting Concerns        │
+                │                                         │
+                │ Logging • Error Handling • Configuration│
+                │ Testing • Request Correlation           │
+                └─────────────────────────────────────────┘
