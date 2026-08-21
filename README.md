@@ -18,6 +18,17 @@
 - Streaming responses
 - Provider-isolated LLM layer
 
+## [0.5.0] — LLM Provider Abstraction
+
+- Introduced LLMProvider abstraction.
+- Added GeminiProvider implementation.
+- Added provider factory.
+- Added configuration-based provider selection.
+- Added provider-level streaming abstraction.
+- Isolated Gemini-specific implementation from ConversationService.
+- Added provider unit and integration tests.
+
+
 ### Reliability
 
 - Environment-based configuration
@@ -37,3 +48,4 @@
 - Isolated SQLite test database
 - Mocked LLM provider calls
 - API error handling tests
+

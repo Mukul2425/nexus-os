@@ -60,3 +60,21 @@ v0.1.0
 ### Testing
 
 - 11 tests passing.
+
+
+## [0.5.0] — LLM Provider Abstraction
+
+### Added
+
+- Introduced LLMProvider abstraction.
+- Added GeminiProvider implementation.
+- Added provider factory.
+- Added configuration-based provider selection.
+- Added provider-level streaming abstraction.
+- Isolated Gemini-specific implementation from ConversationService.
+- Added provider unit and integration tests.
+
+### Testing
+
+- 16 tests passing.
+- 2 dependency warnings.
