@@ -74,3 +74,33 @@ npm-debug.log*     # Node package manager debug logs
 .env               # Environment variable files containing credentials
 .env.local         # Local overrides for configuration secrets
 certs/             # SSL or private keys folder
+
+# ---------------------------------------------------------------------
+# Databases & Runtime Data
+# ---------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+
+# ChromaDB persistent storage
+backend/chroma_data/
+
+chroma_data/
+vector_store/
+
+# Logs
+*.log
+logs/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Local vector stores
+chroma_data/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
