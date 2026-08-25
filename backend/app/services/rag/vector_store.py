@@ -1,3 +1,5 @@
+import uuid
+
 import chromadb
 
 
@@ -9,14 +11,17 @@ collection = client.get_or_create_collection(
     name="nexus_documents"
 )
 
+
 def add_chunks(
     chunks: list[str],
     embeddings: list[list[float]],
     document_name: str,
 ):
-    
+
+    document_id = str(uuid.uuid4())
+
     ids = [
-        f"{document_name}-{index}"
+        f"{document_id}-{index}"
         for index in range(len(chunks))
     ]
 
@@ -27,12 +32,12 @@ def add_chunks(
         metadatas=[
             {
                 "document": document_name,
+                "document_id": document_id,
                 "chunk_id": index,
             }
             for index in range(len(chunks))
         ],
     )
-
 def search(
     embedding: list[float],
     top_k: int = 5,

@@ -1,0 +1,10 @@
+Nexus is an AI-native backend system.
+
+Nexus currently supports conversation management,
+LLM provider abstraction, streaming responses,
+logging, error handling, and automated testing.
+
+The primary LLM provider is Gemini.
+
+The project is being developed incrementally,
+with RAG being introduced in version 0.6.0.
