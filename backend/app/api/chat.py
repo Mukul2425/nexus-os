@@ -28,20 +28,19 @@ def chat(
     db: Session = Depends(get_db),
 ):
 
-    llm_provider = create_llm_provider()
-
     service = ConversationService(
         db,
-        llm_provider,
+        llm_provider=create_llm_provider(),
     )
 
-    response = service.chat(
+    answer, sources = service.chat(
         request.conversation_id,
         request.message,
     )
 
     return ChatResponse(
-        response=response,
+        response=answer,
+        sources=sources,
     )
 
 

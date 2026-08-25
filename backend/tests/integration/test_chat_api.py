@@ -36,7 +36,8 @@ def test_chat(client):
     assert response.status_code == 200
 
     assert response.json() == {
-        "response": "Hello Mukul!"
+    "response": "Hello Mukul!",
+    "sources": [],
     }
 
     mock_provider.generate.assert_called_once()

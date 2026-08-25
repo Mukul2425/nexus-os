@@ -1,4 +1,4 @@
-import uuid
+import hashlib
 
 import chromadb
 
@@ -12,13 +12,18 @@ collection = client.get_or_create_collection(
 )
 
 
+def _document_id(document_name: str) -> str:
+    return hashlib.sha256(
+        document_name.encode("utf-8")
+    ).hexdigest()[:16]
+
+
 def add_chunks(
     chunks: list[str],
     embeddings: list[list[float]],
     document_name: str,
 ):
-
-    document_id = str(uuid.uuid4())
+    document_id = _document_id(document_name)
 
     ids = [
         f"{document_id}-{index}"
@@ -38,11 +43,12 @@ def add_chunks(
             for index in range(len(chunks))
         ],
     )
+
+
 def search(
     embedding: list[float],
     top_k: int = 5,
 ):
-
     return collection.query(
         query_embeddings=[embedding],
         n_results=top_k,

@@ -16,12 +16,13 @@ def test_chat_service(db):
     # Create conversation
     conversation = service.conversation_repository.create()
 
-    response = service.chat(
+    response,sources = service.chat(
         conversation.id,
         "Hello",
     )
 
     assert response == "Hello Mukul!"
+    assert sources == []
 
     mock_provider.generate.assert_called_once()
 
