@@ -49,3 +49,47 @@
 - Mocked LLM provider calls
 - API error handling tests
 
+## v0.6.0 — RAG Foundation
+
+**Status: ✅ Complete**
+
+> Note: Nexus does not manually calculate cosine similarity. Vector similarity/distance is handled by the vector store.
+
+### Implementation
+
+- [x] Document loader
+- [x] Text chunker
+- [x] Embedding generation
+- [x] Persistent vector store using ChromaDB
+- [x] Retrieval service
+- [x] RAG context assembly
+- [x] RAG integration with ConversationService
+- [x] Document ingestion API
+- [x] Source attribution
+- [x] RAG error handling
+
+### Testing
+
+- [x] Chunking tests
+- [x] Retrieval tests
+- [x] RAG prompt tests
+- [x] Document API tests
+- [x] Chat/API integration tests
+- [x] RAG failure-case coverage
+
+### Observability
+
+- [x] Retrieval latency
+- [x] Number of chunks retrieved
+- [x] Retrieval distances
+- [x] RAG error logging
+
+### Deliberately deferred
+
+- [ ] Explicit token/context budgeting
+- [ ] Reranking
+- [ ] Hybrid search
+- [ ] Query rewriting
+- [ ] Multi-query retrieval
+- [ ] Advanced document formats
+- [ ] RAG evaluation framework

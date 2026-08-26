@@ -6,6 +6,7 @@ from app.repositories.conversation_repository import ConversationRepository
 from app.schemas.chat import ChatMessage
 
 from app.services.llm.provider import LLMProvider
+from app.services.rag.rag_service import prepare_rag_question
 
 from app.logging.logger import logger
 from app.logging.context import get_request_id
@@ -32,7 +33,7 @@ class ConversationService:
         self,
         conversation_id: str,
         message: str,
-    ) -> str:
+    ) -> tuple[str, list[dict]]:
 
         request_id = get_request_id()
 
@@ -49,14 +50,20 @@ class ConversationService:
             conversation_id,
         )
 
+        # -----------------------------------------------------
         # Save user message
+        # -----------------------------------------------------
+
         self.message_repository.save(
             conversation_id,
             "user",
             message,
         )
 
+        # -----------------------------------------------------
         # Load conversation history
+        # -----------------------------------------------------
+
         history = self.message_repository.get_messages(
             conversation_id
         )
@@ -69,7 +76,41 @@ class ConversationService:
             for m in history
         ]
 
-        # LLM abstraction
+        # -----------------------------------------------------
+        # Retrieve relevant knowledge
+        # -----------------------------------------------------
+
+        rag_result = prepare_rag_question(
+            question=message,
+            top_k=5,
+        )
+
+        rag_prompt = rag_result["prompt"]
+        sources = rag_result["sources"]
+
+        logger.info(
+            "rag_context_prepared "
+            "request_id=%s "
+            "conversation_id=%s "
+            "sources=%d",
+            request_id,
+            conversation_id,
+            len(sources),
+        )
+
+        # -----------------------------------------------------
+        # Replace current user message with RAG-aware prompt
+        # -----------------------------------------------------
+
+        messages[-1] = ChatMessage(
+            role="user",
+            content=rag_prompt,
+        )
+
+        # -----------------------------------------------------
+        # LLM
+        # -----------------------------------------------------
+
         answer = self.llm_provider.generate(
             messages
         )
@@ -81,7 +122,10 @@ class ConversationService:
             conversation_id,
         )
 
+        # -----------------------------------------------------
         # Save assistant response
+        # -----------------------------------------------------
+
         self.message_repository.save(
             conversation_id,
             "assistant",
@@ -95,7 +139,7 @@ class ConversationService:
             conversation_id,
         )
 
-        return answer
+        return answer, sources
 
     # ---------------------------------------------------------
     # Streaming chat
@@ -131,14 +175,20 @@ class ConversationService:
             conversation_id,
         )
 
+        # -----------------------------------------------------
         # Save user message
+        # -----------------------------------------------------
+
         self.message_repository.save(
             conversation_id,
             "user",
             message,
         )
 
+        # -----------------------------------------------------
         # Load history
+        # -----------------------------------------------------
+
         history = self.message_repository.get_messages(
             conversation_id
         )
@@ -151,6 +201,37 @@ class ConversationService:
             for m in history
         ]
 
+        # -----------------------------------------------------
+        # Retrieve relevant knowledge
+        # -----------------------------------------------------
+
+        rag_result = prepare_rag_question(
+            question=message,
+            top_k=5,
+        )
+
+        rag_prompt = rag_result["prompt"]
+        sources = rag_result["sources"]
+
+        logger.info(
+            "rag_context_prepared "
+            "request_id=%s "
+            "conversation_id=%s "
+            "sources=%d",
+            request_id,
+            conversation_id,
+            len(sources),
+        )
+
+        messages[-1] = ChatMessage(
+            role="user",
+            content=rag_prompt,
+        )
+
+        # -----------------------------------------------------
+        # Stream LLM response
+        # -----------------------------------------------------
+
         response_chunks = []
 
         try:
@@ -161,10 +242,12 @@ class ConversationService:
 
                 response_chunks.append(chunk)
 
-                # Immediately send chunk to client
                 yield chunk
 
+            # -------------------------------------------------
             # Reconstruct complete response
+            # -------------------------------------------------
+
             answer = "".join(response_chunks)
 
             logger.info(
@@ -179,7 +262,10 @@ class ConversationService:
                 len(answer),
             )
 
-            # Save complete assistant response
+            # -------------------------------------------------
+            # Save assistant response
+            # -------------------------------------------------
+
             self.message_repository.save(
                 conversation_id,
                 "assistant",
