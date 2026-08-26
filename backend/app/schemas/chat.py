@@ -15,8 +15,9 @@ class ChatRequest(BaseModel):
 
 class Source(BaseModel):
     document: str
+    document_id: str
     chunk_id: int
-    score: float
+    distance: float
 
 
 class ChatResponse(BaseModel):
