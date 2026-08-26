@@ -78,3 +78,33 @@ v0.1.0
 
 - 16 tests passing.
 - 2 dependency warnings.
+
+
+## [0.6.0] — RAG Foundation
+
+### Added
+
+- Added document ingestion pipeline.
+- Added text chunking.
+- Added Gemini embedding generation.
+- Added persistent ChromaDB vector store.
+- Added semantic retrieval with configurable Top-K retrieval.
+- Added RAG context assembly.
+- Integrated retrieval into the conversation flow.
+- Added document ingestion API.
+- Added source attribution for retrieved context.
+- Added retrieval distance information.
+- Added RAG-specific observability.
+
+### Testing
+
+- Added chunking tests.
+- Added retrieval tests.
+- Added RAG prompt tests.
+- Added document API tests.
+- Added RAG integration and failure-case tests.
+
+### Testing
+
+- 27 tests passing.
+- 3 dependency warnings.

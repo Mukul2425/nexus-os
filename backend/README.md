@@ -12,7 +12,16 @@
 - [x] Provider Factory
 - [x] Gemini Provider
 - [x] Streaming through LLM abstraction
-
+- [x] Persistent conversations
+- [x] Prompt management
+- [x] Streaming responses
+- [x] Logging & observability
+- [x] Production configuration & error handling
+- [x] LLM provider abstraction
+- [x] RAG foundation
+- [x] Document ingestion
+- [x] Semantic retrieval
+- [x] Source attribution
 Backend Foundation
 
 ✔ FastAPI
@@ -126,9 +135,9 @@ Request ──► Logging Middleware
                          ┌─────────────────────┐
                          │     FastAPI API     │
                          │                     │
-                         │ /conversation      │
-                         │ /chat              │
-                         │ /chat/stream       │
+                         │ /conversation       │
+                         │ /chat               │
+                         │ /chat/stream        │
                          └──────────┬──────────┘
                                     │
                                     ▼
@@ -148,10 +157,9 @@ Request ──► Logging Middleware
           │                  │              └─────────────────┘
           │ ConversationRepo │
           │ MessageRepo      │
-          └──────────────────┘
-                                 
-                                 │
-                                 ▼
+          └──────────────────┘                     
+                                   │
+                                   ▼
                          ┌─────────────────────┐
                          │    LLMProvider      │
                          │     Interface       │
@@ -176,11 +184,45 @@ Request ──► Logging Middleware
                                     ▼
                               Gemini API
 
-
-
                 ┌─────────────────────────────────────────┐
                 │           Cross-Cutting Concerns        │
                 │                                         │
                 │ Logging • Error Handling • Configuration│
                 │ Testing • Request Correlation           │
                 └─────────────────────────────────────────┘
+
+
+## Architectural diagram after v0.6.0
+
+                
+                        Client
+                           │
+                           ▼
+                      FastAPI API
+                           │
+                           ▼
+                  ConversationService
+                    │           │
+                    │           ├──────────────┐
+                    ▼           ▼              ▼
+              Repositories   RAG Service   Prompt Builder
+                                 │
+                         ┌───────┴────────┐
+                         ▼                ▼
+                   Embeddings       ChromaDB
+                         │                │
+                         └───────┬────────┘
+                                 │
+                         Retrieved Context
+                                 │
+                                 ▼
+                          Prompt Builder
+                                 │
+                                 ▼
+                           LLMProvider
+                                 │
+                                 ▼
+                         GeminiProvider
+                                 │
+                                 ▼
+                             Gemini
