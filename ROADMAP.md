@@ -17,3 +17,6 @@ Production Hardening
         ↓
 v0.5.0
 LLM Abstraction
+        ↓
+v0.6.0
+RAG Foundation
