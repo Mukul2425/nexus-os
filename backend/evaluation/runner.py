@@ -20,11 +20,17 @@ def evaluate_retrieval(
     questions: list[dict],
     k: int,
 ) -> dict:
-    total = len(questions)
+    retrieval_questions = [
+    question
+    for question in questions
+    if question["expected_source"] is not None
+]
+
+    total = len(retrieval_questions)
     hits = 0
     results = []
 
-    for question in questions:
+    for question in retrieval_questions:
         retrieved = retrieve(
             question["question"],
             top_k=k,
@@ -103,10 +109,20 @@ def print_report(
 
     print()
 
+def get_missing_answer_questions(
+    questions: list[dict],
+) -> list[dict]:
+    return [
+        question
+        for question in questions
+        if question["expected_source"] is None
+    ]
+
 
 if __name__ == "__main__":
     reports = run_evaluation(
-        k_values=[1, 3, 5]
+        k_values=[1, 3, 5, 10]
     )
 
     print_report(reports)
+

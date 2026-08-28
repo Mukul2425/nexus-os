@@ -15,7 +15,10 @@ DOCUMENTS_DIR = (
 )
 
 
-def ingest_evaluation_documents():
+def ingest_evaluation_documents(
+    chunk_size: int = 1000,
+    overlap: int = 200,
+):
     reset_collection()
 
     documents = sorted(
@@ -23,11 +26,17 @@ def ingest_evaluation_documents():
     )
 
     for path in documents:
+
         content = load_document(
-            str(path)
+            path.name,
+            path.read_bytes(),
         )
 
-        chunks = chunk_text(content)
+        chunks = chunk_text(
+            content,
+            chunk_size=chunk_size,
+            overlap=overlap,
+        )
 
         if not chunks:
             continue

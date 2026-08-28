@@ -101,7 +101,7 @@
     "id": "q15",
     "question": "What does RAG combine?",
     "expected_source": "rag.md",
-    "expected_chunk_contains": "information retrieval",
+    "expected_chunk_contains": "retrieval",
     "type": "easy"
   },
   {

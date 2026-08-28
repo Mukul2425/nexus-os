@@ -7,6 +7,9 @@ def hit_at_k(
     """
     Return True if the expected information appears
     within the top-k retrieved results.
+
+    For missing-answer questions, expected_source is None.
+    These questions are not considered retrieval hits.
     """
 
     if expected_source is None:
