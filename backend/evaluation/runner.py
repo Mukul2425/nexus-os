@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from app.services.rag.retriever import retrieve
+from evaluation.retriever import retrieve
 
 from evaluation.metrics.retrieval import hit_at_k
 
