@@ -50,3 +50,19 @@ def test_empty_answer_is_not_grounded():
         "",
         "Nexus uses ChromaDB.",
     )
+
+def test_empty_context_is_not_grounded():
+
+    assert is_grounded(
+        "Nexus uses ChromaDB.",
+        "",
+    ) is False
+
+def test_hallucinated_answer_is_not_grounded():
+
+    context = "Nexus uses ChromaDB as its vector database."
+
+    assert is_grounded(
+        "Nexus uses Pinecone as its vector database.",
+        context,
+    ) is False
