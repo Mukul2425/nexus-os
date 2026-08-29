@@ -1,5 +1,9 @@
 from app.services.rag.embeddings import embed_text
 
+from evaluation.embedding_cache import (
+    get_embedding,
+)
+
 from evaluation.vector_store import search
 
 
@@ -7,7 +11,10 @@ def retrieve(
     question: str,
     top_k: int = 5,
 ):
-    embedding = embed_text(question)
+    embedding = get_embedding(
+        question,
+        embed_text,
+    )
 
     results = search(
         embedding,

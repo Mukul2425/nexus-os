@@ -1,9 +1,10 @@
 from pathlib import Path
 
 from app.services.rag.chunker import chunk_text
-from app.services.rag.embeddings import embed_documents
+from app.services.rag.embeddings import embed_text
 from app.services.rag.loader import load_document
 
+from evaluation.embedding_cache import get_embedding
 from evaluation.vector_store import (
     add_chunks,
     reset_collection,
@@ -41,9 +42,13 @@ def ingest_evaluation_documents(
         if not chunks:
             continue
 
-        embeddings = embed_documents(
-            chunks
+        embeddings = [
+        get_embedding(
+            chunk,
+            embed_text,
         )
+        for chunk in chunks
+    ]
 
         add_chunks(
             chunks=chunks,
