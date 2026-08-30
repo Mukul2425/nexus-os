@@ -1,0 +1,20 @@
+{
+  "version": "v0.7.0",
+  "configuration": {
+    "chunking": "current Nexus chunker",
+    "top_k_default": 5,
+    "vector_store": "ChromaDB",
+    "embedding_provider": "current Nexus embedding provider"
+  },
+  "dataset": {
+    "questions_total": 20,
+    "retrieval_questions": 18,
+    "missing_answer_questions": 2
+  },
+  "retrieval": {
+    "hit_at_1": 0.7778,
+    "hit_at_3": 0.9444,
+    "hit_at_5": 0.9444,
+    "hit_at_10": 0.9444
+  }
+}

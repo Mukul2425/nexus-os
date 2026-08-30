@@ -1,0 +1,142 @@
+[
+  {
+    "id": "q01",
+    "question": "Which vector database does Nexus use?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "ChromaDB",
+    "type": "easy"
+  },
+  {
+    "id": "q02",
+    "question": "What framework is the Nexus backend implemented with?",
+    "expected_source": "nexus_architecture.md",
+    "expected_chunk_contains": "FastAPI",
+    "type": "easy"
+  },
+  {
+    "id": "q03",
+    "question": "What is the default number of chunks retrieved by Nexus?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "top 5",
+    "type": "easy"
+  },
+  {
+    "id": "q04",
+    "question": "What database stores the vectors generated from document chunks?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "ChromaDB",
+    "type": "easy"
+  },
+  {
+    "id": "q05",
+    "question": "What language model provider does Nexus currently support?",
+    "expected_source": "providers.md",
+    "expected_chunk_contains": "Gemini",
+    "type": "easy"
+  },
+  {
+    "id": "q06",
+    "question": "What endpoint is used to create a conversation?",
+    "expected_source": "nexus_architecture.md",
+    "expected_chunk_contains": "/conversation",
+    "type": "easy"
+  },
+  {
+    "id": "q07",
+    "question": "What endpoint is used to send a chat message?",
+    "expected_source": "nexus_architecture.md",
+    "expected_chunk_contains": "/chat",
+    "type": "easy"
+  },
+  {
+    "id": "q08",
+    "question": "What endpoint is used for document ingestion?",
+    "expected_source": "nexus_architecture.md",
+    "expected_chunk_contains": "/documents",
+    "type": "easy"
+  },
+  {
+    "id": "q09",
+    "question": "What happens to documents before their vectors are stored?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "chunks",
+    "type": "easy"
+  },
+  {
+    "id": "q10",
+    "question": "What does the retriever search for?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "semantically similar chunks",
+    "type": "easy"
+  },
+  {
+    "id": "q11",
+    "question": "How does Nexus use embeddings during retrieval?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "embedding",
+    "type": "easy"
+  },
+  {
+    "id": "q12",
+    "question": "What information is included in source attribution?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "document name",
+    "type": "easy"
+  },
+  {
+    "id": "q13",
+    "question": "Why does Nexus have a provider abstraction?",
+    "expected_source": "providers.md",
+    "expected_chunk_contains": "separates the conversation service",
+    "type": "easy"
+  },
+  {
+    "id": "q14",
+    "question": "Which component creates the configured language model provider?",
+    "expected_source": "providers.md",
+    "expected_chunk_contains": "provider factory",
+    "type": "easy"
+  },
+  {
+    "id": "q15",
+    "question": "What does RAG combine?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "retrieval",
+    "type": "easy"
+  },
+  {
+    "id": "q16",
+    "question": "Which framework handles the API layer and which provider handles language generation?",
+    "expected_source": "nexus_architecture.md",
+    "expected_chunk_contains": "FastAPI",
+    "type": "cross_document"
+  },
+  {
+    "id": "q17",
+    "question": "How does Nexus retrieve information before generating an answer?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "vector database",
+    "type": "cross_document"
+  },
+  {
+    "id": "q18",
+    "question": "Does Nexus currently use Pinecone as its vector database?",
+    "expected_source": null,
+    "expected_chunk_contains": null,
+    "type": "missing_answer"
+  },
+  {
+    "id": "q19",
+    "question": "Does Nexus currently use OpenAI as its language model provider?",
+    "expected_source": null,
+    "expected_chunk_contains": null,
+    "type": "missing_answer"
+  },
+  {
+    "id": "q20",
+    "question": "What vector database does Nexus use for language model provider management?",
+    "expected_source": "rag.md",
+    "expected_chunk_contains": "ChromaDB",
+    "type": "similar_but_wrong"
+  }
+]

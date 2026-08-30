@@ -104,3 +104,5 @@ chroma_data/
 .pytest_cache/
 .coverage
 htmlcov/
+evaluation/embedding_cache.json
+backend/evaluation/embedding_cache.json

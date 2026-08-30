@@ -68,6 +68,7 @@
 - [x] Source attribution
 - [x] RAG error handling
 
+
 ### Testing
 
 - [x] Chunking tests
@@ -93,3 +94,99 @@
 - [ ] Multi-query retrieval
 - [ ] Advanced document formats
 - [ ] RAG evaluation framework
+
+
+## v0.7.0 — RAG Quality & Evaluation
+
+**Status: ✅ Complete**
+
+### RAG Evaluation Theory
+
+- [x] Retrieval vs generation evaluation
+- [x] Precision
+- [x] Recall
+- [x] Hit@K
+- [x] Context relevance
+- [x] Answer relevance
+- [x] Faithfulness / groundedness
+- [x] Hallucination
+- [x] LLM-as-a-judge concepts
+
+### Evaluation Dataset
+
+- [x] Versioned evaluation documents
+- [x] 20 evaluation questions
+- [x] Expected sources
+- [x] Expected information
+- [x] Missing-answer cases
+- [x] Similar-but-wrong cases
+- [x] Cross-document questions
+
+### Retrieval Evaluation
+
+- [x] Retrieval evaluation runner
+- [x] Hit@1
+- [x] Hit@3
+- [x] Hit@5
+- [x] Hit@10
+- [x] Retrieval failure inspection
+
+### RAG Experiments
+
+- [x] Top-K experiment
+- [x] Chunk-size experiment
+- [x] Baseline configuration
+- [x] Retrieval result comparison
+
+### Generation Evaluation
+
+- [x] Answer relevance
+- [x] Groundedness
+- [x] Context availability
+- [x] Hallucination detection
+- [x] No-context behavior
+- [x] Generation failure analysis
+
+### Observability
+
+- [x] Evaluation run logging
+- [x] Retrieval metrics logging
+- [x] Generation metrics logging
+- [x] Failure-case reporting
+
+### Testing
+
+- [x] Retrieval metric tests
+- [x] Hit@K tests
+- [x] Evaluation runner tests
+- [x] Generation metric tests
+- [x] Generation runner tests
+- [x] RAG regression tests
+- [x] Existing API regression tests
+
+### v0.7.0 Baseline
+
+| Configuration | Value |
+|---|---|
+| Vector Store | ChromaDB |
+| Embedding | Gemini embedding model |
+| Chunk Size | 512 |
+| Chunk Overlap | 100 |
+| Top-K | 3 |
+| Hit@1 | 83.33% |
+| Hit@3 | 100% |
+| Hit@5 | 100% |
+| Hit@10 | 100% |
+| Answer Relevance | 80% |
+| Groundedness | 60% |
+
+> Generation metrics are deterministic baseline metrics for learning and regression testing. They should not be interpreted as production-grade semantic evaluation.
+
+### Deferred
+
+- [ ] Advanced LLM-as-a-judge evaluation
+- [ ] Ragas / DeepEval integration
+- [ ] Reranking
+- [ ] Hybrid search
+- [ ] Query rewriting
+- [ ] Advanced retrieval strategies

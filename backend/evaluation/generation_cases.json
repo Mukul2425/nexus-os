@@ -1,0 +1,37 @@
+[
+  {
+    "id": "g01",
+    "question": "Which vector database does Nexus use?",
+    "context": "Nexus uses ChromaDB as its vector database.",
+    "answer": "Nexus uses ChromaDB as its vector database.",
+    "expected_answer": "ChromaDB"
+  },
+  {
+    "id": "g02",
+    "question": "What framework is the Nexus backend implemented with?",
+    "context": "The Nexus backend is implemented using FastAPI.",
+    "answer": "The Nexus backend is implemented using FastAPI.",
+    "expected_answer": "FastAPI"
+  },
+  {
+    "id": "g03",
+    "question": "Which language model provider does Nexus support?",
+    "context": "Nexus currently supports Gemini as its language model provider.",
+    "answer": "Nexus currently supports Gemini.",
+    "expected_answer": "Gemini"
+  },
+  {
+    "id": "g04",
+    "question": "Which vector database does Nexus use?",
+    "context": "Nexus uses ChromaDB as its vector database.",
+    "answer": "Nexus uses Pinecone as its vector database.",
+    "expected_answer": "ChromaDB"
+  },
+  {
+    "id": "g05",
+    "question": "Which vector database does Nexus use?",
+    "context": "",
+    "answer": "Nexus uses ChromaDB.",
+    "expected_answer": "ChromaDB"
+  }
+]
