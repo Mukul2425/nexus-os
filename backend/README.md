@@ -22,6 +22,10 @@
 - [x] Document ingestion
 - [x] Semantic retrieval
 - [x] Source attribution
+- [x] RAG evaluation
+- [x] Retrieval quality evaluation
+- [x] Generation quality evaluation
+- [x] RAG regression testing
 Backend Foundation
 
 ✔ FastAPI
@@ -226,3 +230,45 @@ Request ──► Logging Middleware
                                  │
                                  ▼
                              Gemini
+
+
+
+## Architectural diagram for v0.7.0
+
+
+                         ┌──────────────────────┐
+                         │ Evaluation Dataset   │
+                         │                      │
+                         │ Documents            │
+                         │ Questions            │
+                         │ Expected Sources     │
+                         │ Expected Information │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Evaluation Runner    │
+                         └──────────┬───────────┘
+                                    │
+                    ┌───────────────┴────────────────┐
+                    │                                │
+                    ▼                                ▼
+          ┌──────────────────┐              ┌──────────────────┐
+          │ Retrieval        │              │ Generation       │
+          │ Evaluation       │              │ Evaluation       │
+          └────────┬─────────┘              └────────┬─────────┘
+                   │                                 │
+                   ▼                                 ▼
+             Hit@K Metrics                    Answer Relevance
+             Retrieval Failures               Groundedness
+             Distance Analysis                Hallucination
+                   │                                 │
+                   └───────────────┬─────────────────┘
+                                   ▼
+                         ┌──────────────────────┐
+                         │ Evaluation Results   │
+                         │                      │
+                         │ Metrics              │
+                         │ Failed Cases         │
+                         │ Baselines            │
+                         └──────────────────────┘

@@ -108,3 +108,39 @@ v0.1.0
 
 - 27 tests passing.
 - 3 dependency warnings.
+
+
+## [0.7.0] — RAG Quality & Evaluation
+
+### Added
+
+- Added versioned RAG evaluation dataset.
+- Added retrieval evaluation pipeline.
+- Added Hit@1, Hit@3, Hit@5 and Hit@10 metrics.
+- Added retrieval failure inspection.
+- Added Top-K experiments.
+- Added chunk-size experiments.
+- Added generation evaluation pipeline.
+- Added answer relevance evaluation.
+- Added groundedness evaluation.
+- Added hallucination and no-context regression cases.
+- Added evaluation observability.
+- Added RAG regression tests.
+
+### Baseline
+
+- Chunk size: 512
+- Chunk overlap: 100
+- Top-K: 3
+- Hit@1: 83.33%
+- Hit@3: 100%
+- Hit@5: 100%
+- Hit@10: 100%
+- Answer relevance: 80%
+- Groundedness: 60%
+
+### Testing
+
+- 43 tests passed.
+- 3 dependency warnings.
+- No test failures.
