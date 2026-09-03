@@ -1,0 +1,54 @@
+from app.core.exceptions import (
+    UnknownToolError,
+)
+
+from app.tools.base import Tool
+
+
+class ToolRegistry:
+
+    def __init__(self):
+        self._tools: dict[
+            str,
+            Tool,
+        ] = {}
+
+    def register(
+        self,
+        tool: Tool,
+    ) -> None:
+
+        self._tools[tool.name] = tool
+
+    def get(
+        self,
+        tool_name: str,
+    ) -> Tool:
+
+        tool = self._tools.get(
+            tool_name
+        )
+
+        if tool is None:
+            raise UnknownToolError(
+                tool_name
+            )
+
+        return tool
+
+    def has(
+        self,
+        tool_name: str,
+    ) -> bool:
+
+        return (
+            tool_name in self._tools
+        )
+
+    def list_tools(
+        self,
+    ) -> list[Tool]:
+
+        return list(
+            self._tools.values()
+        )
