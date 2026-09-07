@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock, patch
-
+from app.schemas.llm import LLMResponse
 
 def test_chat(client):
 
@@ -16,9 +16,12 @@ def test_chat(client):
 
     mock_provider = MagicMock()
 
-    mock_provider.generate.return_value = (
-        "Hello Mukul!"
+    mock_provider.generate_with_tools.return_value = (
+        LLMResponse(
+            text="Hello Mukul!"
+        )
     )
+
 
     with patch(
         "app.api.chat.create_llm_provider",
@@ -40,7 +43,7 @@ def test_chat(client):
     "sources": [],
     }
 
-    mock_provider.generate.assert_called_once()
+    mock_provider.generate_with_tools.assert_called_once()
 
 
 
@@ -60,8 +63,10 @@ def test_chat_returns_rag_sources(client):
 
     mock_provider = MagicMock()
 
-    mock_provider.generate.return_value = (
-        "Gemini is used by Nexus."
+    mock_provider.generate_with_tools.return_value = (
+    LLMResponse(
+        text="Gemini is used by Nexus."
+        )
     )
 
     fake_retrieved_results = [

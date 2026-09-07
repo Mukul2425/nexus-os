@@ -3,7 +3,7 @@ from app.core.exceptions import (
 )
 
 from app.tools.base import Tool
-
+from app.schemas.llm import ToolDefinition
 
 class ToolRegistry:
 
@@ -52,3 +52,17 @@ class ToolRegistry:
         return list(
             self._tools.values()
         )
+
+
+    def get_definitions(
+        self,
+    ) -> list[ToolDefinition]:
+
+        return [
+            ToolDefinition(
+                name=tool.name,
+                description=tool.description,
+                input_schema=tool.input_schema,
+            )
+            for tool in self.list_tools()
+        ]

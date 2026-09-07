@@ -2,7 +2,9 @@ from unittest.mock import MagicMock, patch
 
 from app.services.llm.gemini import GeminiProvider
 from app.schemas.chat import ChatMessage
-
+from app.schemas.llm import (
+    ToolDefinition,
+)
 
 def test_gemini_generate():
 
@@ -70,3 +72,29 @@ def test_gemini_build_contents():
             ],
         },
     ]
+
+
+def test_gemini_build_tools():
+
+    provider = GeminiProvider()
+
+    tools = [
+        ToolDefinition(
+            name="calculator",
+            description="Perform arithmetic.",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "a": {
+                        "type": "number",
+                    }
+                },
+            },
+        )
+    ]
+
+    gemini_tools = provider._build_tools(
+        tools
+    )
+
+    assert len(gemini_tools) == 1
