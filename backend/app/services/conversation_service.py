@@ -341,11 +341,6 @@ class ConversationService:
 
                 return response.text or ""
 
-            # ---------------------------------------------
-            # Reset results for this iteration
-            # ---------------------------------------------
-
-            tool_results = []
 
             # ---------------------------------------------
             # Execute requested tools
