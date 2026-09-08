@@ -26,6 +26,7 @@
 - [x] Retrieval quality evaluation
 - [x] Generation quality evaluation
 - [x] RAG regression testing
+- [x] Tool Calling 
 Backend Foundation
 
 ✔ FastAPI
