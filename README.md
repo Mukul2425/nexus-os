@@ -1,194 +1,377 @@
-# nexus-os
-## Features
+# Nexus OS
 
-### Backend
+Nexus OS is an AI backend designed to progressively evolve from a conversational AI system into a tool-using, retrieval-augmented, agentic AI platform.
 
-- FastAPI-based REST API
-- Conversation management
-- Persistent conversation history
-- UUID-based conversations
-- SQLite database
-- SQLAlchemy ORM
+## Current Version
 
-### LLM
+**v0.8.0 — Tool Calling & MCP Foundation**
 
-- Gemini integration
-- Prompt management
-- Multi-turn conversations
-- Streaming responses
-- Provider-isolated LLM layer
+## Current Capabilities
 
-## [0.5.0] — LLM Provider Abstraction
+Nexus OS currently supports:
 
-- Introduced LLMProvider abstraction.
-- Added GeminiProvider implementation.
-- Added provider factory.
-- Added configuration-based provider selection.
-- Added provider-level streaming abstraction.
-- Isolated Gemini-specific implementation from ConversationService.
-- Added provider unit and integration tests.
+* Persistent conversations
+* SQLite and SQLAlchemy-based message storage
+* Centralized prompt management
+* Streaming LLM responses
+* Centralized logging and request observability
+* Request IDs and request correlation
+* Production-oriented error handling
+* Automated testing
+* Provider abstraction
+* Gemini LLM provider
+* Retrieval-Augmented Generation (RAG)
+* Document ingestion
+* Vector search using ChromaDB
+* RAG evaluation and regression testing
+* Tool calling
+* Multi-step tool execution
+* Tool failure recovery
+* Built-in calculator tool
+* Built-in time tool
+
+---
+
+# Current Architecture
+
+```text
+                         User
+                           │
+                           ▼
+                    FastAPI API Layer
+                           │
+                           ▼
+                  Conversation Service
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+              ▼                         ▼
+      Conversation History         RAG Retrieval
+              │                         │
+              └────────────┬────────────┘
+                           │
+                           ▼
+                     Prompt Context
+                           │
+                           ▼
+                    LLM Provider
+                           │
+                    ┌──────┴──────┐
+                    │             │
+                    ▼             ▼
+              Final Answer    Tool Call Requested
+                    │             │
+                    │             ▼
+                    │       Tool Executor
+                    │             │
+                    │             ▼
+                    │        Tool Registry
+                    │             │
+                    │      ┌──────┴──────┐
+                    │      │             │
+                    ▼      ▼             ▼
+                 Response Calculator    Time
+                    ▲
+                    │
+                    └──── Tool Result ────
+                           │
+                           ▼
+                      LLM Provider
+                           │
+                           ▼
+                      Final Answer
+                           │
+                           ▼
+                    Save to Database
+                           │
+                           ▼
+                        Response
+```
+
+---
+
+# Tool Calling Architecture
+
+Nexus uses provider-neutral abstractions for tool calling.
+
+```text
+ConversationService
+        │
+        ▼
+   LLM Provider
+        │
+        ▼
+    LLMResponse
+        │
+        ├───────────────┐
+        │               │
+        ▼               ▼
+ Final Response      Tool Calls
+                         │
+                         ▼
+                    ToolExecutor
+                         │
+                         ▼
+                    ToolRegistry
+                         │
+              ┌──────────┴──────────┐
+              ▼                     ▼
+        CalculatorTool          TimeTool
+              │                     │
+              └──────────┬──────────┘
+                         ▼
+                     ToolResult
+                         │
+                         ▼
+                    LLM Provider
+                         │
+                         ▼
+                    Final Answer
+```
+
+---
+
+# Tool Execution Flow
+
+```text
+User Message
+     │
+     ▼
+ConversationService
+     │
+     ▼
+RAG Retrieval
+     │
+     ▼
+LLM + Tool Definitions
+     │
+     ▼
+Does the LLM request a tool?
+     │
+ ┌───┴────┐
+ │        │
+No       Yes
+ │        │
+ ▼        ▼
+Final   ToolExecutor
+Answer      │
+ │          ▼
+ │      Execute Tool
+ │          │
+ │          ▼
+ │      ToolResult
+ │          │
+ │          ▼
+ │      Send Result to LLM
+ │          │
+ │          ▼
+ │      Tool Requested Again?
+ │          │
+ │      ┌───┴────┐
+ │      │        │
+ │     No       Yes
+ │      │        │
+ │      ▼        └──── Repeat
+ │   Final
+ │   Answer
+ │
+ ▼
+Save Assistant Message
+ │
+ ▼
+API Response
+```
+
+---
+
+# Built-in Tools
+
+## Calculator Tool
+
+Supported operations:
+
+* add
+* subtract
+* multiply
+* divide
+
+The tool validates:
+
+* Invalid operations
+* Invalid numeric arguments
+* Division by zero
+
+---
+
+## Time Tool
+
+Returns the current time for valid IANA timezones.
+
+Examples:
+
+```text
+Asia/Kolkata
+America/New_York
+Europe/London
+```
+
+The tool validates:
+
+* Missing timezone
+* Invalid timezone
+* Invalid argument types
+
+---
+
+# Tool Safety and Reliability
+
+The tool-calling architecture includes:
+
+* Unknown tool detection
+* Invalid argument validation
+* Tool execution error handling
+* Tool failure recovery
+* Maximum tool-call limit
+
+The maximum number of tool calls prevents infinite execution loops.
+
+```text
+MAX_TOOL_CALLS = 5
+```
+
+---
+
+# Streaming
+
+Text streaming remains supported.
+
+Current streaming architecture:
+
+```text
+/chat/stream
+      │
+      ▼
+Conversation History
+      │
+      ▼
+RAG Retrieval
+      │
+      ▼
+LLM Text Streaming
+      │
+      ▼
+Streaming Response
+```
+
+Tool-aware streaming is intentionally deferred.
+
+The current streaming interface:
+
+```text
+AsyncGenerator[str, None]
+```
+
+only supports text chunks.
+
+Future tool-aware streaming will require structured events such as:
+
+```text
+text_delta
+tool_call_started
+tool_call_arguments_delta
+tool_call_completed
+tool_result
+generation_resumed
+error
+```
+
+This will require a dedicated structured streaming architecture.
+
+---
+
+# Current API
+
+```text
+POST /conversation
+
+Creates a new conversation.
 
 
-### Reliability
+POST /chat
 
-- Environment-based configuration
-- Pydantic Settings
-- Custom application exceptions
-- Global API exception handling
-- Safe and consistent error responses
-- Request ID tracking
-- Structured application logging
-- LLM latency and failure logging
-
-### Testing
-
-- Pytest test suite
-- Unit tests
-- Integration tests
-- Isolated SQLite test database
-- Mocked LLM provider calls
-- API error handling tests
-
-## v0.6.0 — RAG Foundation
-
-**Status: ✅ Complete**
-
-> Note: Nexus does not manually calculate cosine similarity. Vector similarity/distance is handled by the vector store.
-
-### Implementation
-
-- [x] Document loader
-- [x] Text chunker
-- [x] Embedding generation
-- [x] Persistent vector store using ChromaDB
-- [x] Retrieval service
-- [x] RAG context assembly
-- [x] RAG integration with ConversationService
-- [x] Document ingestion API
-- [x] Source attribution
-- [x] RAG error handling
+Loads conversation history
+→ Retrieves relevant RAG context
+→ Calls LLM
+→ Executes tools if requested
+→ Returns final response
+→ Saves assistant response
 
 
-### Testing
+POST /chat/stream
 
-- [x] Chunking tests
-- [x] Retrieval tests
-- [x] RAG prompt tests
-- [x] Document API tests
-- [x] Chat/API integration tests
-- [x] RAG failure-case coverage
+Loads conversation history
+→ Retrieves relevant RAG context
+→ Streams text response
 
-### Observability
+Current streaming does not execute tools.
+```
 
-- [x] Retrieval latency
-- [x] Number of chunks retrieved
-- [x] Retrieval distances
-- [x] RAG error logging
+---
 
-### Deliberately deferred
+# Current Testing Status
 
-- [ ] Explicit token/context budgeting
-- [ ] Reranking
-- [ ] Hybrid search
-- [ ] Query rewriting
-- [ ] Multi-query retrieval
-- [ ] Advanced document formats
-- [ ] RAG evaluation framework
+```text
+64 passed
+3 warnings
+```
 
+The warnings are dependency/deprecation warnings and do not indicate failures in Nexus OS.
 
-## v0.7.0 — RAG Quality & Evaluation
+Tool-related coverage includes:
 
-**Status: ✅ Complete**
+* Tool registry
+* Tool factory
+* Calculator tool
+* Time tool
+* Tool executor
+* Tool-calling loop
+* Multi-step execution
+* Tool failure handling
+* Existing regression tests
 
-### RAG Evaluation Theory
+---
 
-- [x] Retrieval vs generation evaluation
-- [x] Precision
-- [x] Recall
-- [x] Hit@K
-- [x] Context relevance
-- [x] Answer relevance
-- [x] Faithfulness / groundedness
-- [x] Hallucination
-- [x] LLM-as-a-judge concepts
+# Current Development Direction
 
-### Evaluation Dataset
+```text
+v0.6.0
+RAG Foundation
+      │
+      ▼
+v0.7.0
+RAG Evaluation
+      │
+      ▼
+v0.8.0
+Tool Calling
+      │
+      ▼
+v0.9.0
+Memory
+      │
+      ▼
+v1.0.0
+Agentic Orchestration
+```
 
-- [x] Versioned evaluation documents
-- [x] 20 evaluation questions
-- [x] Expected sources
-- [x] Expected information
-- [x] Missing-answer cases
-- [x] Similar-but-wrong cases
-- [x] Cross-document questions
+Nexus OS is now capable of:
 
-### Retrieval Evaluation
+```text
+Remembering conversations
+        +
+Retrieving knowledge
+        +
+Using external tools
+```
 
-- [x] Retrieval evaluation runner
-- [x] Hit@1
-- [x] Hit@3
-- [x] Hit@5
-- [x] Hit@10
-- [x] Retrieval failure inspection
-
-### RAG Experiments
-
-- [x] Top-K experiment
-- [x] Chunk-size experiment
-- [x] Baseline configuration
-- [x] Retrieval result comparison
-
-### Generation Evaluation
-
-- [x] Answer relevance
-- [x] Groundedness
-- [x] Context availability
-- [x] Hallucination detection
-- [x] No-context behavior
-- [x] Generation failure analysis
-
-### Observability
-
-- [x] Evaluation run logging
-- [x] Retrieval metrics logging
-- [x] Generation metrics logging
-- [x] Failure-case reporting
-
-### Testing
-
-- [x] Retrieval metric tests
-- [x] Hit@K tests
-- [x] Evaluation runner tests
-- [x] Generation metric tests
-- [x] Generation runner tests
-- [x] RAG regression tests
-- [x] Existing API regression tests
-
-### v0.7.0 Baseline
-
-| Configuration | Value |
-|---|---|
-| Vector Store | ChromaDB |
-| Embedding | Gemini embedding model |
-| Chunk Size | 512 |
-| Chunk Overlap | 100 |
-| Top-K | 3 |
-| Hit@1 | 83.33% |
-| Hit@3 | 100% |
-| Hit@5 | 100% |
-| Hit@10 | 100% |
-| Answer Relevance | 80% |
-| Groundedness | 60% |
-
-> Generation metrics are deterministic baseline metrics for learning and regression testing. They should not be interpreted as production-grade semantic evaluation.
-
-### Deferred
-
-- [ ] Advanced LLM-as-a-judge evaluation
-- [ ] Ragas / DeepEval integration
-- [ ] Reranking
-- [ ] Hybrid search
-- [ ] Query rewriting
-- [ ] Advanced retrieval strategies
-
-
+The next major step is giving the system controlled long-term memory.

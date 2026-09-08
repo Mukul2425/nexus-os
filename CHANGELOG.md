@@ -144,3 +144,57 @@ v0.1.0
 - 43 tests passed.
 - 3 dependency warnings.
 - No test failures.
+
+
+### [0.8.0] — Tool Calling & MCP Foundation ✅
+### Core Architecture
+- Tool abstraction
+-   Provider-neutral tool definitions
+-    Provider-neutral tool calls
+-    Provider-neutral tool results
+-    Structured LLM responses
+-    Tool Infrastructure
+-    Tool registry
+-    Tool factory
+-    Tool executor
+-    Shared registry architecture
+-    Built-in Tools
+-    Calculator tool
+-    Time tool
+-    LLM Integration
+-    Gemini function/tool calling
+-    Tool definitions sent to provider
+-    Provider-specific responses converted into provider-neutral schemas
+-    Conversation Tool Loop
+-    Tool-call detection
+-    Tool execution
+-    Tool result handling
+-    Multi-step tool execution
+-    Failed tool recovery
+-    Maximum tool-call protection
+-    MAX_TOOL_CALLS = 5
+-    Integration
+-   RAG preserved
+-    Conversation history preserved
+-    Message persistence preserved
+-    Existing chat API preserved
+-    Existing text streaming preserved
+### Testing
+-    64 passed
+-    3 warnings
+
+
+### Deferred from v0.8.0
+-    Tool-Aware Streaming ⏳
+###  Current streaming interface:
+-    AsyncGenerator[str, None]
+-    Current implementation only supports text deltas.
+-    Tool-aware streaming requires a structured event architecture capable of representing:
+-    text_delta
+-    tool_call_started
+-    tool_call_arguments_delta
+-    tool_call_completed
+-    tool_result
+-    generation_resumed
+-    error
+-    This feature is intentionally deferred rather than forced into the existing string-based streaming interface.

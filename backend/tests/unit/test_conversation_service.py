@@ -1,12 +1,16 @@
 from unittest.mock import MagicMock
-
+from app.schemas.llm import LLMResponse
 from app.services.conversation_service import ConversationService
 
 
 def test_chat_service(db):
     mock_provider = MagicMock()
 
-    mock_provider.generate.return_value = "Hello Mukul!"
+    mock_provider.generate_with_tools.return_value = (
+    LLMResponse(
+        text="Hello Mukul!",
+    )
+)
 
     service = ConversationService(
         db,
@@ -24,13 +28,17 @@ def test_chat_service(db):
     assert response == "Hello Mukul!"
     assert sources == []
 
-    mock_provider.generate.assert_called_once()
+    mock_provider.generate_with_tools.assert_called_once()
 
 
 def test_chat_service_saves_messages(db):
     mock_provider = MagicMock()
 
-    mock_provider.generate.return_value = "Hello!"
+    mock_provider.generate_with_tools.return_value = (
+    LLMResponse(
+        text="Hello!",
+    )
+)
 
     service = ConversationService(
         db,

@@ -12,7 +12,14 @@ from app.logging.logger import logger
 from app.logging.context import get_request_id
 
 from app.core.exceptions import ConversationNotFoundError
+from app.schemas.llm import ToolResult
 
+from app.tools.factory import (
+    create_tool_executor,
+    create_tool_registry,
+)
+
+MAX_TOOL_CALLS = 5
 
 class ConversationService:
 
@@ -23,7 +30,14 @@ class ConversationService:
     ):
         self.conversation_repository = ConversationRepository(db)
         self.message_repository = MessageRepository(db)
+
         self.llm_provider = llm_provider
+
+        self.tool_registry = create_tool_registry()
+
+        self.tool_executor = create_tool_executor(
+            self.tool_registry
+        )
 
     # ---------------------------------------------------------
     # Normal chat
@@ -111,8 +125,8 @@ class ConversationService:
         # LLM
         # -----------------------------------------------------
 
-        answer = self.llm_provider.generate(
-            messages
+        answer = self._generate_with_tools(
+        messages
         )
 
         logger.info(
@@ -292,3 +306,122 @@ class ConversationService:
             )
 
             raise
+
+
+    def _generate_with_tools(
+        self,
+        messages: list[ChatMessage],
+    ) -> str:
+
+        request_id = get_request_id()
+
+        tool_definitions = (
+            self.tool_registry.get_definitions()
+        )
+
+        tool_results: list[ToolResult] = []
+
+        tool_call_count = 0
+
+        while tool_call_count < MAX_TOOL_CALLS:
+
+            response = (
+                self.llm_provider.generate_with_tools(
+                    messages=messages,
+                    tools=tool_definitions,
+                    tool_results=tool_results or None,
+                )
+            )
+
+            # ---------------------------------------------
+            # Final answer
+            # ---------------------------------------------
+
+            if not response.tool_calls:
+
+                return response.text or ""
+
+            # ---------------------------------------------
+            # Reset results for this iteration
+            # ---------------------------------------------
+
+            tool_results = []
+
+            # ---------------------------------------------
+            # Execute requested tools
+            # ---------------------------------------------
+
+            for tool_call in response.tool_calls:
+
+                if tool_call_count >= MAX_TOOL_CALLS:
+
+                    break
+
+                tool_call_count += 1
+
+                logger.info(
+                    "tool_call_requested "
+                    "request_id=%s "
+                    "tool_name=%s "
+                    "tool_call_count=%d",
+                    request_id,
+                    tool_call.name,
+                    tool_call_count,
+                )
+
+                try:
+
+                    execution = (
+                        self.tool_executor.execute(
+                            tool_name=tool_call.name,
+                            arguments=tool_call.arguments,
+                            request_id=request_id,
+                        )
+                    )
+
+                    tool_results.append(
+                        ToolResult(
+                            tool_call_id=tool_call.id,
+                            name=tool_call.name,
+                            result=execution["result"],
+                            success=True,
+                        )
+                    )
+
+                except Exception as exc:
+
+                    logger.warning(
+                        "tool_execution_failed "
+                        "request_id=%s "
+                        "tool_name=%s "
+                        "error=%s",
+                        request_id,
+                        tool_call.name,
+                        str(exc),
+                    )
+
+                    tool_results.append(
+                        ToolResult(
+                            tool_call_id=tool_call.id,
+                            name=tool_call.name,
+                            result=None,
+                            success=False,
+                            error=(
+                                "The requested tool "
+                                "could not be executed."
+                            ),
+                        )
+                    )
+
+        logger.warning(
+            "tool_call_limit_reached "
+            "request_id=%s "
+            "max_tool_calls=%d",
+            request_id,
+            MAX_TOOL_CALLS,
+        )
+
+        return (
+            "I could not complete the request because "
+            "the maximum number of tool calls was reached."
+        )

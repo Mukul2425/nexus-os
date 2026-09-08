@@ -37,3 +37,48 @@ class ConversationNotFoundError(NexusException):
             message="Conversation not found",
             status_code=404,
         )
+
+class UnknownToolError(NexusException):
+
+    def __init__(
+        self,
+        tool_name: str,
+    ):
+        super().__init__(
+            code="UNKNOWN_TOOL",
+            message=f"Unknown tool: {tool_name}",
+            status_code=400,
+        )
+
+
+class InvalidToolArgumentsError(NexusException):
+
+    def __init__(
+        self,
+        tool_name: str,
+        message: str,
+    ):
+        super().__init__(
+            code="INVALID_TOOL_ARGUMENTS",
+            message=(
+                f"Invalid arguments for tool "
+                f"'{tool_name}': {message}"
+            ),
+            status_code=400,
+        )
+
+
+class ToolExecutionError(NexusException):
+
+    def __init__(
+        self,
+        tool_name: str,
+        message: str = "Tool execution failed",
+    ):
+        super().__init__(
+            code="TOOL_EXECUTION_ERROR",
+            message=(
+                f"{tool_name}: {message}"
+            ),
+            status_code=500,
+        )
