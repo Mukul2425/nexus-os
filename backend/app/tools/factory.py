@@ -19,9 +19,9 @@ def create_tool_registry() -> ToolRegistry:
     return registry
 
 
-def create_tool_executor() -> ToolExecutor:
-
-    registry = create_tool_registry()
+def create_tool_executor(
+    registry: ToolRegistry,
+) -> ToolExecutor:
 
     return ToolExecutor(
         registry

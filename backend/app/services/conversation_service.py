@@ -33,12 +33,10 @@ class ConversationService:
 
         self.llm_provider = llm_provider
 
-        self.tool_registry = (
-            create_tool_registry()
-        )
+        self.tool_registry = create_tool_registry()
 
-        self.tool_executor = (
-            create_tool_executor()
+        self.tool_executor = create_tool_executor(
+            self.tool_registry
         )
 
     # ---------------------------------------------------------

@@ -1,17 +1,12 @@
-from app.core.exceptions import (
-    UnknownToolError,
-)
-
-from app.tools.base import Tool
+from app.core.exceptions import UnknownToolError
 from app.schemas.llm import ToolDefinition
+from app.tools.base import Tool
+
 
 class ToolRegistry:
 
     def __init__(self):
-        self._tools: dict[
-            str,
-            Tool,
-        ] = {}
+        self._tools: dict[str, Tool] = {}
 
     def register(
         self,
@@ -25,14 +20,10 @@ class ToolRegistry:
         tool_name: str,
     ) -> Tool:
 
-        tool = self._tools.get(
-            tool_name
-        )
+        tool = self._tools.get(tool_name)
 
         if tool is None:
-            raise UnknownToolError(
-                tool_name
-            )
+            raise UnknownToolError(tool_name)
 
         return tool
 
@@ -41,18 +32,13 @@ class ToolRegistry:
         tool_name: str,
     ) -> bool:
 
-        return (
-            tool_name in self._tools
-        )
+        return tool_name in self._tools
 
     def list_tools(
         self,
     ) -> list[Tool]:
 
-        return list(
-            self._tools.values()
-        )
-
+        return list(self._tools.values())
 
     def get_definitions(
         self,
