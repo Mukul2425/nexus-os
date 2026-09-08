@@ -272,3 +272,76 @@ Request ──► Logging Middleware
                          │ Failed Cases         │
                          │ Baselines            │
                          └──────────────────────┘
+
+
+
+## Architectural diagram for v0.8.0
+
+
+                         ┌──────────────────┐
+                         │      USER        │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │   FastAPI API    │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                    ┌──────────────────────────┐
+                    │  Conversation Service    │
+                    └────────────┬─────────────┘
+                                 │
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+              ▼                  ▼                  ▼
+      Conversation DB         RAG System       Tool Registry
+              │                  │                  │
+              │                  ▼                  │
+              │             ChromaDB                │
+              │                  │                  │
+              └────────────┬─────┴──────────────────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │ Prompt Context  │
+                  └────────┬────────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │  LLM Provider   │
+                  │     Gemini      │
+                  └────────┬────────┘
+                           │
+                ┌──────────┴───────────┐
+                │                      │
+                ▼                      ▼
+         Final Response             Tool Call
+                │                      │
+                │                      ▼
+                │              Tool Executor
+                │                      │
+                │          ┌───────────┴───────────┐
+                │          │                       │
+                │          ▼                       ▼
+                │     Calculator Tool          Time Tool
+                │          │                       │
+                │          └───────────┬───────────┘
+                │                      │
+                │                      ▼
+                │                 Tool Result
+                │                      │
+                │                      ▼
+                │                 LLM Again
+                │                      │
+                └──────────────┬───────┘
+                               │
+                               ▼
+                       Final Assistant
+                         Response
+                               │
+                               ▼
+                         Save Message
+                               │
+                               ▼
+                            USER
