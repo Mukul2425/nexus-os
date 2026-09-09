@@ -5,6 +5,7 @@ from app.core.exceptions import (
     MemoryNotFoundError,
 )
 from app.services.memory.service import MemoryService
+from unittest.mock import MagicMock
 
 
 def test_memory_service_create(db):
@@ -54,3 +55,65 @@ def test_memory_service_delete(db):
 
     with pytest.raises(MemoryNotFoundError):
         service.get(memory.id)
+
+
+
+
+
+def test_extract_and_create_memory(db):
+    provider = MagicMock()
+
+    provider.generate.return_value = """
+    {
+        "memories": [
+            {
+                "content": "User prefers Python.",
+                "memory_type": "semantic",
+                "importance": 4,
+                "confidence": 0.95
+            }
+        ]
+    }
+    """
+
+    service = MemoryService(
+        db,
+        llm_provider=provider,
+    )
+
+    memories = service.extract_and_create(
+        "I prefer Python."
+    )
+
+    assert len(memories) == 1
+    assert memories[0].content == (
+        "User prefers Python."
+    )
+
+
+def test_extract_and_create_rejects_irrelevant_memory(db):
+    provider = MagicMock()
+
+    provider.generate.return_value = """
+    {
+        "memories": [
+            {
+                "content": "What is Python?",
+                "memory_type": "semantic",
+                "importance": 2,
+                "confidence": 0.99
+            }
+        ]
+    }
+    """
+
+    service = MemoryService(
+        db,
+        llm_provider=provider,
+    )
+
+    memories = service.extract_and_create(
+        "What is Python?"
+    )
+
+    assert memories == []

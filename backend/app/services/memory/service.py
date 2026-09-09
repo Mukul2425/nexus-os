@@ -5,12 +5,34 @@ from app.core.exceptions import (
 from app.logging.context import get_request_id
 from app.logging.logger import logger
 from app.repositories.memory_repository import MemoryRepository
+from app.services.memory.eligibility import (
+    MemoryEligibilityService,
+)
+from app.services.memory.extractor import MemoryExtractor
 
 
 class MemoryService:
 
-    def __init__(self, db):
+    def __init__(
+        self,
+        db,
+        llm_provider=None,
+    ):
         self.repository = MemoryRepository(db)
+
+        self.eligibility = (
+            MemoryEligibilityService()
+        )
+
+        self.extractor = (
+            MemoryExtractor(llm_provider)
+            if llm_provider is not None
+            else None
+        )
+
+    # ---------------------------------------------------------
+    # Manual memory management
+    # ---------------------------------------------------------
 
     def create(
         self,
@@ -26,7 +48,10 @@ class MemoryService:
                 "Memory content cannot be empty."
             )
 
-        if memory_type not in {"semantic", "episodic"}:
+        if memory_type not in {
+            "semantic",
+            "episodic",
+        }:
             raise InvalidMemoryError(
                 "Memory type must be semantic or episodic."
             )
@@ -35,8 +60,6 @@ class MemoryService:
             raise InvalidMemoryError(
                 "Memory importance must be between 1 and 5."
             )
-
-        request_id = get_request_id()
 
         memory = self.repository.create(
             content=content,
@@ -50,7 +73,7 @@ class MemoryService:
             "memory_id=%s "
             "memory_type=%s "
             "importance=%d",
-            request_id,
+            get_request_id(),
             memory.id,
             memory.memory_type,
             memory.importance,
@@ -105,18 +128,20 @@ class MemoryService:
                     "Memory content cannot be empty."
                 )
 
-        if memory_type is not None and memory_type not in {
-            "semantic",
-            "episodic",
-        }:
-            raise InvalidMemoryError(
-                "Memory type must be semantic or episodic."
-            )
+        if memory_type is not None:
+            if memory_type not in {
+                "semantic",
+                "episodic",
+            }:
+                raise InvalidMemoryError(
+                    "Memory type must be semantic or episodic."
+                )
 
-        if importance is not None and not 1 <= importance <= 5:
-            raise InvalidMemoryError(
-                "Memory importance must be between 1 and 5."
-            )
+        if importance is not None:
+            if not 1 <= importance <= 5:
+                raise InvalidMemoryError(
+                    "Memory importance must be between 1 and 5."
+                )
 
         updated = self.repository.update(
             memory,
@@ -147,3 +172,57 @@ class MemoryService:
             get_request_id(),
             memory_id,
         )
+
+    # ---------------------------------------------------------
+    # Automatic extraction
+    # ---------------------------------------------------------
+
+    def extract_and_create(
+        self,
+        message: str,
+    ):
+        if self.extractor is None:
+            raise RuntimeError(
+                "Memory extractor requires an LLM provider."
+            )
+
+        request_id = get_request_id()
+
+        candidates = self.extractor.extract(
+            message
+        )
+
+        eligible = self.eligibility.filter(
+            candidates
+        )
+
+        logger.info(
+            "memory_candidates_filtered "
+            "request_id=%s "
+            "candidates=%d "
+            "eligible=%d",
+            request_id,
+            len(candidates),
+            len(eligible),
+        )
+
+        created = []
+
+        for candidate in eligible:
+            memory = self.create(
+                content=candidate.content,
+                memory_type=candidate.memory_type,
+                importance=candidate.importance,
+            )
+
+            created.append(memory)
+
+        logger.info(
+            "memory_extraction_persisted "
+            "request_id=%s "
+            "created=%d",
+            request_id,
+            len(created),
+        )
+
+        return created
