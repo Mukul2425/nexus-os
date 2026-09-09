@@ -1,0 +1,149 @@
+from app.core.exceptions import (
+    InvalidMemoryError,
+    MemoryNotFoundError,
+)
+from app.logging.context import get_request_id
+from app.logging.logger import logger
+from app.repositories.memory_repository import MemoryRepository
+
+
+class MemoryService:
+
+    def __init__(self, db):
+        self.repository = MemoryRepository(db)
+
+    def create(
+        self,
+        *,
+        content: str,
+        memory_type: str = "semantic",
+        importance: int = 3,
+    ):
+        content = content.strip()
+
+        if not content:
+            raise InvalidMemoryError(
+                "Memory content cannot be empty."
+            )
+
+        if memory_type not in {"semantic", "episodic"}:
+            raise InvalidMemoryError(
+                "Memory type must be semantic or episodic."
+            )
+
+        if not 1 <= importance <= 5:
+            raise InvalidMemoryError(
+                "Memory importance must be between 1 and 5."
+            )
+
+        request_id = get_request_id()
+
+        memory = self.repository.create(
+            content=content,
+            memory_type=memory_type,
+            importance=importance,
+        )
+
+        logger.info(
+            "memory_created "
+            "request_id=%s "
+            "memory_id=%s "
+            "memory_type=%s "
+            "importance=%d",
+            request_id,
+            memory.id,
+            memory.memory_type,
+            memory.importance,
+        )
+
+        return memory
+
+    def get(self, memory_id: str):
+        memory = self.repository.get(memory_id)
+
+        if memory is None:
+            raise MemoryNotFoundError()
+
+        return memory
+
+    def list(
+        self,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+    ):
+        if limit < 1 or limit > 1000:
+            raise InvalidMemoryError(
+                "Limit must be between 1 and 1000."
+            )
+
+        if offset < 0:
+            raise InvalidMemoryError(
+                "Offset cannot be negative."
+            )
+
+        return self.repository.list(
+            limit=limit,
+            offset=offset,
+        )
+
+    def update(
+        self,
+        memory_id: str,
+        *,
+        content: str | None = None,
+        memory_type: str | None = None,
+        importance: int | None = None,
+    ):
+        memory = self.get(memory_id)
+
+        if content is not None:
+            content = content.strip()
+
+            if not content:
+                raise InvalidMemoryError(
+                    "Memory content cannot be empty."
+                )
+
+        if memory_type is not None and memory_type not in {
+            "semantic",
+            "episodic",
+        }:
+            raise InvalidMemoryError(
+                "Memory type must be semantic or episodic."
+            )
+
+        if importance is not None and not 1 <= importance <= 5:
+            raise InvalidMemoryError(
+                "Memory importance must be between 1 and 5."
+            )
+
+        updated = self.repository.update(
+            memory,
+            content=content,
+            memory_type=memory_type,
+            importance=importance,
+        )
+
+        logger.info(
+            "memory_updated "
+            "request_id=%s "
+            "memory_id=%s",
+            get_request_id(),
+            memory_id,
+        )
+
+        return updated
+
+    def delete(self, memory_id: str) -> None:
+        memory = self.get(memory_id)
+
+        self.repository.delete(memory)
+
+        logger.info(
+            "memory_deleted "
+            "request_id=%s "
+            "memory_id=%s",
+            get_request_id(),
+            memory_id,
+        )
