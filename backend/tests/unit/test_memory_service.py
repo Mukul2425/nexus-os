@@ -117,3 +117,38 @@ def test_extract_and_create_rejects_irrelevant_memory(db):
     )
 
     assert memories == []
+
+def test_create_rejects_duplicate_memory(db):
+    service = MemoryService(db)
+
+    service.create(
+        content="User prefers Python.",
+        memory_type="semantic",
+        importance=4,
+    )
+
+    with pytest.raises(InvalidMemoryError):
+        service.create(
+            content="user   prefers   python!",
+            memory_type="semantic",
+            importance=4,
+        )
+
+    assert service.repository.count() == 1
+
+
+
+def test_create_allows_different_memories(db):
+    service = MemoryService(db)
+
+    first = service.create(
+        content="User prefers Python.",
+    )
+
+    second = service.create(
+        content="User prefers TypeScript.",
+    )
+
+    assert first.id != second.id
+
+    assert service.repository.count() == 2
