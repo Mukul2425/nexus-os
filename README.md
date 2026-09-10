@@ -1,377 +1,348 @@
-# Nexus OS
+# Nexus OS Roadmap
 
-Nexus OS is an AI backend designed to progressively evolve from a conversational AI system into a tool-using, retrieval-augmented, agentic AI platform.
+## Vision
 
-## Current Version
+Nexus OS is evolving from a simple LLM backend into a modular AI application platform.
 
-**v0.8.0 — Tool Calling & MCP Foundation**
+```text
+Chat
+  ↓
+Conversation
+  ↓
+Observability
+  ↓
+Production Hardening
+  ↓
+Provider Abstraction
+  ↓
+RAG
+  ↓
+RAG Evaluation
+  ↓
+Tool Calling
+  ↓
+Memory
+  ↓
+Agentic Orchestration
+```
 
-## Current Capabilities
+---
 
-Nexus OS currently supports:
+# Completed Milestones
 
-* Persistent conversations
-* SQLite and SQLAlchemy-based message storage
-* Centralized prompt management
-* Streaming LLM responses
-* Centralized logging and request observability
-* Request IDs and request correlation
-* Production-oriented error handling
-* Automated testing
-* Provider abstraction
-* Gemini LLM provider
-* Retrieval-Augmented Generation (RAG)
+## v0.1 — Backend Foundation
+
+**Status: ✅ Complete**
+
+* FastAPI backend
+* Gemini integration
+* Chat API
+* Multi-turn interaction
+* Streaming responses
+* Initial project architecture
+
+---
+
+## v0.2 — Session Management
+
+**Status: ✅ Complete**
+
+* SQLite
+* SQLAlchemy
+* Conversation model
+* Message model
+* Conversation repositories
+* Message repositories
+* Conversation service
+* Persistent conversation history
+
+---
+
+## v0.3 — Logging & Observability
+
+**Status: ✅ Complete**
+
+* Centralized logging
+* Request IDs
+* Request middleware
+* Latency logging
+* LLM operation logging
+* Streaming observability
+* Correlated request logging
+
+---
+
+## v0.4 — Production Hardening
+
+**Status: ✅ Complete**
+
+* Pydantic Settings
+* Environment configuration
+* `.env` support
+* Centralized exceptions
+* Standardized API errors
+* Provider failure handling
+* Test infrastructure
+
+---
+
+## v0.5 — LLM Provider Abstraction
+
+**Status: ✅ Complete**
+
+* `LLMProvider`
+* Gemini provider
+* Provider factory
+* Provider-neutral errors
+* Normal generation
+* Streaming generation
+* Provider tests
+
+---
+
+## v0.6 — RAG Foundation
+
+**Status: ✅ Complete**
+
 * Document ingestion
-* Vector search using ChromaDB
-* RAG evaluation and regression testing
-* Tool calling
-* Multi-step tool execution
-* Tool failure recovery
-* Built-in calculator tool
-* Built-in time tool
+* Text chunking
+* Embeddings
+* ChromaDB
+* Semantic retrieval
+* Context assembly
+* Source attribution
+* RAG observability
+
+---
+
+## v0.7 — RAG Evaluation
+
+**Status: ✅ Complete**
+
+* Evaluation dataset
+* Retrieval evaluation
+* Hit@K
+* Top-K experiments
+* Chunk-size experiments
+* Generation evaluation
+* Groundedness evaluation
+* Failure analysis
+* Evaluation observability
+
+---
+
+## v0.8 — Tool Calling
+
+**Status: ✅ Complete**
+
+* Tool definitions
+* Tool calls
+* Tool results
+* Tool registry
+* Tool executor
+* Calculator tool
+* Time tool
+* Tool error handling
+* Gemini function calling
+* Tool execution loop
+* Maximum tool-call protection
+* RAG + tools compatibility
+
+Tool-aware streaming was intentionally deferred because the existing streaming abstraction currently produces plain text events.
+
+---
+
+## v0.9 — Memory Foundation
+
+**Status: ✅ Complete**
+
+### Memory
+
+* SQLAlchemy memory model
+* UUID memory IDs
+* Semantic and episodic memory
+* Importance scoring
+* Memory timestamps
+* Indexed database records
+
+### CRUD
+
+* Create
+* Read
+* List
+* Update
+* Delete
+* Pagination
+* Validation
+* Error handling
+
+### Extraction
+
+* Memory candidate schema
+* LLM extraction
+* Confidence scoring
+* Importance scoring
+* Memory classification
+* Malformed-output handling
+
+### Eligibility
+
+* Confidence filtering
+* Blank-content rejection
+* Invalid-type rejection
+* Question filtering
+* Temporary-request filtering
+* Small-talk filtering
+* Inference rejection
+
+### Deduplication
+
+* Content normalization
+* Whitespace normalization
+* Punctuation normalization
+* Duplicate detection
+* Duplicate persistence prevention
+
+### Vector Memory
+
+* ChromaDB memory collection
+* Existing embedding infrastructure
+* Memory embeddings
+* Metadata linking
+* Vector update
+* Vector deletion
+* Semantic search
+* Distance thresholding
+
+### Conflict Detection
+
+* Related-memory retrieval
+* Semantic conflict detection
+* LLM conflict classification
+* Failure-safe behavior
+
+Automatic conflict resolution is intentionally deferred.
+
+### Retrieval
+
+* Semantic memory retrieval
+* Configurable top-K
+* Distance filtering
+* Stale-vector handling
+* SQLite source-of-truth lookup
+* Retrieval observability
+
+### Chat Integration
+
+* Memory retrieval in `/chat`
+* Memory retrieval in `/chat/stream`
+* Post-generation memory extraction
+* RAG compatibility
+* Tool compatibility
+* Failure isolation
+
+### Testing
+
+**108 tests passing**
 
 ---
 
 # Current Architecture
 
 ```text
-                         User
+                         ┌─────────────┐
+                         │    User     │
+                         └──────┬──────┘
+                                │
+                                ▼
+                         ┌─────────────┐
+                         │   FastAPI   │
+                         └──────┬──────┘
+                                │
+                                ▼
+                    ┌──────────────────────┐
+                    │ ConversationService │
+                    └───────┬─────┬────────┘
+                            │     │
+             ┌──────────────┘     └──────────────┐
+             ▼                                   ▼
+      ┌─────────────┐                     ┌─────────────┐
+      │ Conversation│                     │    Memory   │
+      │   History   │                     │   System    │
+      └──────┬──────┘                     └──────┬──────┘
+             │                                   │
+             ▼                                   ▼
+         SQLite                              SQLite
+                                                 │
+                                                 ▼
+                                            ChromaDB
+
+                    ┌─────────────┐
+                    │     RAG     │
+                    └──────┬──────┘
                            │
                            ▼
-                    FastAPI API Layer
+                       ChromaDB
+
+                            │
+                            ▼
+                    ┌─────────────┐
+                    │   Context   │
+                    │   Builder   │
+                    └──────┬──────┘
                            │
                            ▼
-                  Conversation Service
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-              ▼                         ▼
-      Conversation History         RAG Retrieval
-              │                         │
-              └────────────┬────────────┘
+                    ┌─────────────┐
+                    │ LLM Provider│
+                    └──────┬──────┘
                            │
                            ▼
-                     Prompt Context
-                           │
-                           ▼
-                    LLM Provider
-                           │
-                    ┌──────┴──────┐
-                    │             │
-                    ▼             ▼
-              Final Answer    Tool Call Requested
-                    │             │
-                    │             ▼
-                    │       Tool Executor
-                    │             │
-                    │             ▼
-                    │        Tool Registry
-                    │             │
-                    │      ┌──────┴──────┐
-                    │      │             │
-                    ▼      ▼             ▼
-                 Response Calculator    Time
-                    ▲
-                    │
-                    └──── Tool Result ────
-                           │
-                           ▼
-                      LLM Provider
-                           │
-                           ▼
-                      Final Answer
-                           │
-                           ▼
-                    Save to Database
-                           │
-                           ▼
-                        Response
+                    ┌─────────────┐
+                    │    Tools    │
+                    └─────────────┘
 ```
 
 ---
 
-# Tool Calling Architecture
+# v1.0 — Agentic Orchestration
 
-Nexus uses provider-neutral abstractions for tool calling.
+**Status: ⏳ Planned**
 
-```text
-ConversationService
-        │
-        ▼
-   LLM Provider
-        │
-        ▼
-    LLMResponse
-        │
-        ├───────────────┐
-        │               │
-        ▼               ▼
- Final Response      Tool Calls
-                         │
-                         ▼
-                    ToolExecutor
-                         │
-                         ▼
-                    ToolRegistry
-                         │
-              ┌──────────┴──────────┐
-              ▼                     ▼
-        CalculatorTool          TimeTool
-              │                     │
-              └──────────┬──────────┘
-                         ▼
-                     ToolResult
-                         │
-                         ▼
-                    LLM Provider
-                         │
-                         ▼
-                    Final Answer
-```
+The next major milestone will focus on orchestrating the capabilities already built.
 
----
+Potential areas:
 
-# Tool Execution Flow
-
-```text
-User Message
-     │
-     ▼
-ConversationService
-     │
-     ▼
-RAG Retrieval
-     │
-     ▼
-LLM + Tool Definitions
-     │
-     ▼
-Does the LLM request a tool?
-     │
- ┌───┴────┐
- │        │
-No       Yes
- │        │
- ▼        ▼
-Final   ToolExecutor
-Answer      │
- │          ▼
- │      Execute Tool
- │          │
- │          ▼
- │      ToolResult
- │          │
- │          ▼
- │      Send Result to LLM
- │          │
- │          ▼
- │      Tool Requested Again?
- │          │
- │      ┌───┴────┐
- │      │        │
- │     No       Yes
- │      │        │
- │      ▼        └──── Repeat
- │   Final
- │   Answer
- │
- ▼
-Save Assistant Message
- │
- ▼
-API Response
-```
-
----
-
-# Built-in Tools
-
-## Calculator Tool
-
-Supported operations:
-
-* add
-* subtract
-* multiply
-* divide
-
-The tool validates:
-
-* Invalid operations
-* Invalid numeric arguments
-* Division by zero
-
----
-
-## Time Tool
-
-Returns the current time for valid IANA timezones.
-
-Examples:
-
-```text
-Asia/Kolkata
-America/New_York
-Europe/London
-```
-
-The tool validates:
-
-* Missing timezone
-* Invalid timezone
-* Invalid argument types
-
----
-
-# Tool Safety and Reliability
-
-The tool-calling architecture includes:
-
-* Unknown tool detection
-* Invalid argument validation
-* Tool execution error handling
-* Tool failure recovery
-* Maximum tool-call limit
-
-The maximum number of tool calls prevents infinite execution loops.
-
-```text
-MAX_TOOL_CALLS = 5
-```
-
----
-
-# Streaming
-
-Text streaming remains supported.
-
-Current streaming architecture:
-
-```text
-/chat/stream
-      │
-      ▼
-Conversation History
-      │
-      ▼
-RAG Retrieval
-      │
-      ▼
-LLM Text Streaming
-      │
-      ▼
-Streaming Response
-```
-
-Tool-aware streaming is intentionally deferred.
-
-The current streaming interface:
-
-```text
-AsyncGenerator[str, None]
-```
-
-only supports text chunks.
-
-Future tool-aware streaming will require structured events such as:
-
-```text
-text_delta
-tool_call_started
-tool_call_arguments_delta
-tool_call_completed
-tool_result
-generation_resumed
-error
-```
-
-This will require a dedicated structured streaming architecture.
-
----
-
-# Current API
-
-```text
-POST /conversation
-
-Creates a new conversation.
-
-
-POST /chat
-
-Loads conversation history
-→ Retrieves relevant RAG context
-→ Calls LLM
-→ Executes tools if requested
-→ Returns final response
-→ Saves assistant response
-
-
-POST /chat/stream
-
-Loads conversation history
-→ Retrieves relevant RAG context
-→ Streams text response
-
-Current streaming does not execute tools.
-```
-
----
-
-# Current Testing Status
-
-```text
-64 passed
-3 warnings
-```
-
-The warnings are dependency/deprecation warnings and do not indicate failures in Nexus OS.
-
-Tool-related coverage includes:
-
-* Tool registry
-* Tool factory
-* Calculator tool
-* Time tool
-* Tool executor
-* Tool-calling loop
+* Agent state
+* Planning
+* Tool selection
 * Multi-step execution
-* Tool failure handling
-* Existing regression tests
+* Task decomposition
+* Agent execution loop
+* Memory usage during execution
+* RAG usage during execution
+* Tool usage during execution
+* Agent failure recovery
+* Execution limits
+* Agent evaluation
+
+The goal is not to create a complex autonomous system immediately.
+
+The goal is to build a **controlled, observable, testable agent execution loop**.
 
 ---
 
-# Current Development Direction
+# Deferred / Future Work
 
-```text
-v0.6.0
-RAG Foundation
-      │
-      ▼
-v0.7.0
-RAG Evaluation
-      │
-      ▼
-v0.8.0
-Tool Calling
-      │
-      ▼
-v0.9.0
-Memory
-      │
-      ▼
-v1.0.0
-Agentic Orchestration
-```
+The following are intentionally not part of the current roadmap milestones unless justified by future requirements:
 
-Nexus OS is now capable of:
+* Automatic memory conflict resolution
+* Graph-based memory
+* Multi-agent memory
+* Cognitive memory simulation
+* Reinforcement-learning memory
+* Multiple vector databases
+* Enterprise privacy platform
+* Complex autonomous behavior
+* Frontend before the core AI architecture is mature
 
-```text
-Remembering conversations
-        +
-Retrieving knowledge
-        +
-Using external tools
-```
-
-The next major step is giving the system controlled long-term memory.
+Future features should be driven by actual system requirements and evaluation results rather than complexity for its own sake.

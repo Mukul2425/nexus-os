@@ -198,3 +198,158 @@ v0.1.0
 -    generation_resumed
 -    error
 -    This feature is intentionally deferred rather than forced into the existing string-based streaming interface.
+
+
+
+### [v0.9.0] — Memory Foundation
+## Added
+## Memory Model
+-   Added SQLAlchemy Memory model.
+-   Added UUID-based memory IDs.
+-   Added memory content.
+-   Added semantic and episodic memory types.
+-   Added importance scores from 1–5.
+-   Added creation and update timestamps.
+-   Added database indexes.
+-   Added SQLite memories table.
+##  Memory CRUD API
+##   Added:
+-   POST   /memories
+-   GET    /memories
+-   GET    /memories/{id}
+-   PATCH  /memories/{id}
+-   DELETE /memories/{id}
+##   Also added:
+-   Pagination.
+-   Input validation.
+-   Invalid-memory handling.
+-   Memory-not-found handling.
+-   Nexus exception integration.
+-   Standardized API errors.
+-   Automatic Memory Extraction
+##  Added:
+-  MemoryCandidate.
+-   MemoryExtractionResult.
+-   LLM-based memory extraction.
+-   Confidence scores.
+-   Importance scores.
+-   Semantic/episodic classification.
+-   Extraction of explicit user information.
+-   Extraction of persistent preferences.
+-   Extraction of useful project/user information.
+-   Malformed LLM response handling.
+-   Memory Eligibility
+##   Added filtering for:
+-  Low-confidence candidates.
+-   Blank memories.
+-   Invalid memory types.
+-   Ordinary questions.
+-   Temporary requests.
+-   Greetings.
+-   Small talk.
+-   Assistant-inferred information.
+-   Memory Deduplication
+##   Added:
+-  Whitespace normalization.
+-   Case normalization.
+-   Punctuation normalization.
+-   Repeated-whitespace normalization.
+-   Duplicate detection.
+-   Duplicate persistence prevention.
+-   Vector Memory Store
+-   Added a dedicated ChromaDB memory collection.
+-   The memory vector layer supports:
+-   Embedding generation.
+-   Memory vector storage.
+-   Memory metadata.
+-   SQLite memory ID references.
+-   Vector updates.
+-   Vector deletion.
+-   Semantic search.
+-   Distance-based filtering.
+-   SQLite remains the authoritative source for persisted memory records.
+-   Conflict Detection
+##  Added:
+-  Related-memory retrieval.
+-   Semantic conflict detection.
+-   LLM-based contradiction classification.
+-   Failure-safe conflict detection.
+ 
+   Example:
+    "I prefer Python."
+
+    vs.
+
+    "I prefer TypeScript instead of Python."
+    can be identified as a potential conflict.
+
+    Automatic conflict resolution is intentionally deferred.
+    Memory Retrieval
+##   Added:
+    MemoryRetriever.
+    Semantic search.
+    Configurable top-K.
+    Distance thresholds.
+    Stale-vector handling.
+    SQLite source-of-truth lookup.
+    Retrieval latency logging.
+    Retrieval lifecycle logging.
+    Chat Integration
+    Memory is now integrated into:
+    POST /chat
+    POST /chat/stream
+    The chat pipeline can:
+    Retrieve relevant memories.
+    Build memory context.
+    Combine memory with conversation and RAG context.
+    Generate the response.
+    Extract new memories after response generation.
+    Memory failures are isolated from normal chat execution.
+    Compatibility
+    Verified compatibility with:
+    Conversation history.
+    RAG.
+    Tool calling.
+    Streaming.
+    Existing provider abstraction.
+    Existing exception handling.
+    Existing observability.
+    Testing
+    Expanded the test suite across memory functionality.
+    Final result:
+    108 passed
+    Changed
+    Conversation context now supports relevant persistent memories.
+    Chat requests can use long-term memory in addition to conversation history and RAG.
+    Memory extraction occurs after response generation.
+    Memory indexing is best-effort so vector-store failures do not invalidate successful SQLite CRUD operations.
+    Reliability
+    Memory functionality was designed with failure isolation:
+    Memory Retrieval Failure
+            ↓
+        Log Error
+            ↓
+    Continue Chat
+    Memory Extraction Failure
+            ↓
+        Log Error
+            ↓
+    Continue Chat
+    This prevents optional memory functionality from becoming a single point of failure for the core chat pipeline.
+    Deferred
+    The following is intentionally deferred:
+    Automatic Conflict Resolution
+    The system currently detects potential conflicts but does not automatically replace or update an existing memory when a contradiction is detected.
+    This will be reconsidered when memory behavior is extended in future versions.
+    Validation
+    The v0.9 implementation was validated through:
+    Automated test suite.
+    SQLite persistence checks.
+    Manual memory creation.
+    ChromaDB indexing checks.
+    Extraction-path validation.
+    Failure-path validation.
+    Chat integration tests.
+    Streaming integration tests.
+    RAG compatibility tests.
+    Tool compatibility tests.

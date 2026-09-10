@@ -21,7 +21,7 @@ from app.schemas.llm import (
 from app.services.llm.provider import LLMProvider
 
 
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.5-flash"
 
 
 class GeminiProvider(LLMProvider):

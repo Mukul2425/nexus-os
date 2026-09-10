@@ -12,6 +12,9 @@ from app.logging.middleware import LoggingMiddleware
 from app.core.exceptions import NexusException
 from app.core.exception_handlers import nexus_exception_handler
 from app.api.documents import router as documents_router
+from app.models import Memory
+from app.api.memories import router as memories_router
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -34,3 +37,4 @@ app.add_exception_handler(
 app.include_router(
     documents_router
 )
+app.include_router(memories_router)

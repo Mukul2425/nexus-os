@@ -19,7 +19,13 @@ from app.tools.factory import (
     create_tool_registry,
 )
 
+from app.services.memory.context import build_memory_message
+from app.services.memory.retriever import MemoryRetriever
+from app.services.memory.service import MemoryService
+
+
 MAX_TOOL_CALLS = 5
+
 
 class ConversationService:
 
@@ -37,6 +43,15 @@ class ConversationService:
 
         self.tool_executor = create_tool_executor(
             self.tool_registry
+        )
+
+        self.memory_service = MemoryService(
+            db,
+            llm_provider=llm_provider,
+        )
+
+        self.memory_retriever = MemoryRetriever(
+            db,
         )
 
     # ---------------------------------------------------------
@@ -91,6 +106,28 @@ class ConversationService:
         ]
 
         # -----------------------------------------------------
+        # Retrieve relevant memories
+        # -----------------------------------------------------
+
+        memory_message = self._build_memory_context(
+            message
+        )
+
+        if memory_message is not None:
+            messages.insert(
+                0,
+                memory_message,
+            )
+
+            logger.info(
+                "memory_context_added "
+                "request_id=%s "
+                "conversation_id=%s",
+                request_id,
+                conversation_id,
+            )
+
+        # -----------------------------------------------------
         # Retrieve relevant knowledge
         # -----------------------------------------------------
 
@@ -126,12 +163,13 @@ class ConversationService:
         # -----------------------------------------------------
 
         answer = self._generate_with_tools(
-        messages
+            messages
         )
 
         logger.info(
             "llm_response_received "
-            "request_id=%s conversation_id=%s",
+            "request_id=%s "
+            "conversation_id=%s",
             request_id,
             conversation_id,
         )
@@ -148,9 +186,21 @@ class ConversationService:
 
         logger.info(
             "assistant_message_saved "
-            "request_id=%s conversation_id=%s",
+            "request_id=%s "
+            "conversation_id=%s",
             request_id,
             conversation_id,
+        )
+
+        # -----------------------------------------------------
+        # Extract memories from user message
+        #
+        # Memory extraction is best-effort. A memory failure
+        # must never make an otherwise successful chat fail.
+        # -----------------------------------------------------
+
+        self._extract_memories_safely(
+            message
         )
 
         return answer, sources
@@ -216,6 +266,28 @@ class ConversationService:
         ]
 
         # -----------------------------------------------------
+        # Retrieve relevant memories
+        # -----------------------------------------------------
+
+        memory_message = self._build_memory_context(
+            message
+        )
+
+        if memory_message is not None:
+            messages.insert(
+                0,
+                memory_message,
+            )
+
+            logger.info(
+                "memory_context_added "
+                "request_id=%s "
+                "conversation_id=%s",
+                request_id,
+                conversation_id,
+            )
+
+        # -----------------------------------------------------
         # Retrieve relevant knowledge
         # -----------------------------------------------------
 
@@ -225,7 +297,6 @@ class ConversationService:
         )
 
         rag_prompt = rag_result["prompt"]
-        sources = rag_result["sources"]
 
         logger.info(
             "rag_context_prepared "
@@ -234,7 +305,7 @@ class ConversationService:
             "sources=%d",
             request_id,
             conversation_id,
-            len(sources),
+            len(rag_result["sources"]),
         )
 
         messages[-1] = ChatMessage(
@@ -288,9 +359,21 @@ class ConversationService:
 
             logger.info(
                 "stream_assistant_message_saved "
-                "request_id=%s conversation_id=%s",
+                "request_id=%s "
+                "conversation_id=%s",
                 request_id,
                 conversation_id,
+            )
+
+            # -------------------------------------------------
+            # Extract memories from user message
+            #
+            # Do this only after the stream has completed and
+            # the assistant response has been persisted.
+            # -------------------------------------------------
+
+            self._extract_memories_safely(
+                message
             )
 
         except Exception:
@@ -307,6 +390,9 @@ class ConversationService:
 
             raise
 
+    # ---------------------------------------------------------
+    # Tool calling
+    # ---------------------------------------------------------
 
     def _generate_with_tools(
         self,
@@ -341,7 +427,6 @@ class ConversationService:
 
                 return response.text or ""
 
-
             # ---------------------------------------------
             # Execute requested tools
             # ---------------------------------------------
@@ -349,7 +434,6 @@ class ConversationService:
             for tool_call in response.tool_calls:
 
                 if tool_call_count >= MAX_TOOL_CALLS:
-
                     break
 
                 tool_call_count += 1
@@ -420,3 +504,78 @@ class ConversationService:
             "I could not complete the request because "
             "the maximum number of tool calls was reached."
         )
+
+    # ---------------------------------------------------------
+    # Memory retrieval
+    # ---------------------------------------------------------
+
+    def _build_memory_context(
+        self,
+        message: str,
+    ) -> ChatMessage | None:
+
+        try:
+
+            memories = self.memory_retriever.retrieve(
+                query=message,
+                top_k=5,
+            )
+
+            memory_message = build_memory_message(
+                memories
+            )
+
+            logger.info(
+                "memory_context_prepared "
+                "request_id=%s "
+                "memories=%d",
+                get_request_id(),
+                len(memories),
+            )
+
+            return memory_message
+
+        except Exception:
+
+            logger.exception(
+                "memory_retrieval_failed "
+                "request_id=%s",
+                get_request_id(),
+            )
+
+            # Memory is an optional enhancement.
+            # If retrieval fails, normal chat continues.
+            return None
+
+    # ---------------------------------------------------------
+    # Memory extraction
+    # ---------------------------------------------------------
+
+    def _extract_memories_safely(
+        self,
+        message: str,
+    ) -> None:
+
+        try:
+
+            memories = (
+                self.memory_service.extract_and_create(
+                    message
+                )
+            )
+
+            logger.info(
+                "memory_extraction_complete "
+                "request_id=%s "
+                "memories_created=%d",
+                get_request_id(),
+                len(memories),
+            )
+
+        except Exception:
+
+            logger.exception(
+                "memory_extraction_failed "
+                "request_id=%s",
+                get_request_id(),
+            )

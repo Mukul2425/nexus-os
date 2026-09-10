@@ -82,3 +82,20 @@ class ToolExecutionError(NexusException):
             ),
             status_code=500,
         )
+
+class MemoryNotFoundError(NexusException):
+    def __init__(self):
+        super().__init__(
+            code="MEMORY_NOT_FOUND",
+            message="Memory not found.",
+            status_code=404,
+        )
+
+
+class InvalidMemoryError(NexusException):
+    def __init__(self, message: str = "Invalid memory."):
+        super().__init__(
+            code="INVALID_MEMORY",
+            message=message,
+            status_code=400,
+        )
