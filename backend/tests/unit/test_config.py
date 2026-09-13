@@ -3,7 +3,7 @@ from app.core.config import settings
 
 def test_settings():
 
-    assert settings.VERSION == "0.4.0"
+    assert settings.VERSION == "0.9.0"
 
     assert settings.LLM_PROVIDER == "gemini"
 
