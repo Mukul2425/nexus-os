@@ -22,7 +22,7 @@ from app.schemas.llm import (
     LLMResponse,
     ToolCall,
 )
-from backend.tests.unit.test_agent_service import build_service
+from tests.unit.test_agent_service import build_service
 
 
 def test_agent_retrieves_memory(
