@@ -22,6 +22,7 @@ from app.schemas.llm import (
     LLMResponse,
     ToolCall,
 )
+from backend.tests.unit.test_agent_service import build_service
 
 
 def test_agent_retrieves_memory(
@@ -552,3 +553,65 @@ def test_normal_tool_definitions_are_still_available(
     assert "rag_retrieval" in capability_names
 
 
+def test_agent_creates_plan():
+    provider = Mock()
+
+    provider.generate_with_tools.return_value = LLMResponse(
+        text="FastAPI is a Python web framework."
+    )
+
+    service, _ = build_service(provider)
+
+    result = service.run(
+        conversation_id="c1",
+        task="What is FastAPI?",
+    )
+
+    assert result.status.value == "completed"
+    assert result.plan == ["What is FastAPI?"]
+    assert result.plan_progress == ["completed"]
+
+
+def test_agent_tracks_multi_step_plan():
+    provider = Mock()
+
+    provider.generate_with_tools.side_effect = [
+        LLMResponse(
+            tool_calls=[
+                ToolCall(
+                    id="call-1",
+                    name="time",
+                    arguments={"timezone": "Europe/London"},
+                )
+            ]
+        ),
+        LLMResponse(
+            tool_calls=[
+                ToolCall(
+                    id="call-2",
+                    name="calculator",
+                    arguments={"expression": "24 - 10"},
+                )
+            ]
+        ),
+        LLMResponse(
+            text="14 hours remain."
+        ),
+    ]
+
+    service, _ = build_service(provider)
+
+    result = service.run(
+        conversation_id="c1",
+        task=(
+            "Get the time in London and then calculate "
+            "how many hours remain until midnight."
+        ),
+    )
+
+    assert result.status.value == "completed"
+    assert len(result.plan) == 2
+    assert all(
+        status == "completed"
+        for status in result.plan_progress
+    )

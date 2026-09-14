@@ -1,3 +1,4 @@
+
 import json
 import time
 import uuid
@@ -32,6 +33,7 @@ from app.tools.factory import (
     create_tool_executor,
     create_tool_registry,
 )
+from app.services.agent.planner import AgentPlanner
 
 
 MAX_AGENT_STEPS = 10
@@ -49,6 +51,7 @@ class AgentService:
         memory_retriever=None,
         *,
         db=None,
+        planner=None,
         max_steps: int = MAX_AGENT_STEPS,
         max_tool_calls: int = MAX_TOOL_CALLS,
         timeout_seconds: float = AGENT_TIMEOUT_SECONDS,
@@ -70,7 +73,11 @@ class AgentService:
             )
         )
 
-        
+        self.planner = (
+            planner
+            if planner is not None
+            else AgentPlanner()
+        )
 
         if memory_retriever is not None:
             self.memory_retriever = memory_retriever
@@ -78,7 +85,6 @@ class AgentService:
             self.memory_retriever = MemoryRetriever(db)
         else:
             self.memory_retriever = None
-
 
         self.max_steps = max_steps
         self.max_tool_calls = max_tool_calls
@@ -106,6 +112,15 @@ class AgentService:
             task=task.strip(),
             conversation_id=conversation_id,
         )
+
+        # -----------------------------------------------------
+        # LIGHTWEIGHT PLANNING
+        # -----------------------------------------------------
+
+        plan = self.planner.create_plan(task)
+
+        state.plan = plan
+        state.plan_progress = ["pending"] * len(plan)
 
         state.status = AgentStatus.RUNNING
 
@@ -139,6 +154,8 @@ class AgentService:
                 )
 
                 if elapsed >= self.timeout_seconds:
+                    self._mark_plan_step_failed(state)
+
                     return self._fail(
                         state=state,
                         execution_id=execution_id,
@@ -159,6 +176,12 @@ class AgentService:
                 state.status = AgentStatus.EXECUTING
 
                 step_number = state.current_step
+
+                # -------------------------------------------------
+                # PLAN PROGRESS
+                # -------------------------------------------------
+
+                self._mark_plan_step_started(state)
 
                 logger.info(
                     "agent_step_started "
@@ -186,6 +209,8 @@ class AgentService:
                         )
                     )
                 except Exception as exc:
+                    self._mark_plan_step_failed(state)
+
                     logger.exception(
                         "agent_execution_failed "
                         "execution_id=%s "
@@ -211,6 +236,8 @@ class AgentService:
                 try:
                     action = decide_action(response)
                 except AgentDecisionError as exc:
+                    self._mark_plan_step_failed(state)
+
                     logger.exception(
                         "agent_execution_failed "
                         "execution_id=%s "
@@ -261,6 +288,8 @@ class AgentService:
                     and len(state.tool_calls)
                     >= self.max_tool_calls
                 ):
+                    self._mark_plan_step_failed(state)
+
                     return self._fail(
                         state=state,
                         execution_id=execution_id,
@@ -274,6 +303,8 @@ class AgentService:
                     repeated_actions[fingerprint]
                     > self.max_repeated_actions
                 ):
+                    self._mark_plan_step_failed(state)
+
                     step = AgentStep(
                         step_number=step_number,
                         action=action,
@@ -323,6 +354,9 @@ class AgentService:
                     state.steps.append(step)
 
                     state.final_response = action.response
+
+                    self._mark_plan_step_completed(state)
+
                     state.status = AgentStatus.COMPLETED
 
                     logger.info(
@@ -360,6 +394,9 @@ class AgentService:
                     )
 
                     state.steps.append(step)
+
+                    self._mark_plan_step_completed(state)
+
                     state.status = AgentStatus.COMPLETED
 
                     return self._result(
@@ -400,6 +437,14 @@ class AgentService:
                             observation["memories"]
                         )
 
+                        self._mark_plan_step_completed(
+                            state
+                        )
+                    else:
+                        self._mark_plan_step_failed(
+                            state
+                        )
+
                     messages.append(
                         self._observation_message(
                             observation
@@ -431,8 +476,8 @@ class AgentService:
 
                 if action.type == AgentActionType.RAG:
 
-                    success, rag_observation, sources = self._execute_rag(
-                        action
+                    success, rag_observation, sources = (
+                        self._execute_rag(action)
                     )
 
                     if success:
@@ -446,6 +491,11 @@ class AgentService:
                         state.retrieved_documents.extend(
                             sources
                         )
+
+                        self._mark_plan_step_completed(
+                            state
+                        )
+
                     else:
                         observation = {
                             "type": "rag",
@@ -454,6 +504,10 @@ class AgentService:
                             "sources": [],
                             "error": "RAG retrieval failed",
                         }
+
+                        self._mark_plan_step_failed(
+                            state
+                        )
 
                     step = AgentStep(
                         step_number=step_number,
@@ -503,6 +557,8 @@ class AgentService:
                     tool_name = action.tool_name
 
                     if not tool_name:
+                        self._mark_plan_step_failed(state)
+
                         return self._fail(
                             state=state,
                             execution_id=execution_id,
@@ -515,6 +571,8 @@ class AgentService:
                     if not self.tool_registry.has(
                         tool_name
                     ):
+                        self._mark_plan_step_failed(state)
+
                         step = AgentStep(
                             step_number=step_number,
                             action=action,
@@ -637,6 +695,15 @@ class AgentService:
 
                     state.steps.append(step)
 
+                    if tool_success:
+                        self._mark_plan_step_completed(
+                            state
+                        )
+                    else:
+                        self._mark_plan_step_failed(
+                            state
+                        )
+
                     logger.info(
                         "agent_tool_execution_complete "
                         "execution_id=%s "
@@ -657,6 +724,12 @@ class AgentService:
 
                     continue
 
+                # -------------------------------------------------
+                # UNSUPPORTED ACTION
+                # -------------------------------------------------
+
+                self._mark_plan_step_failed(state)
+
                 return self._fail(
                     state=state,
                     execution_id=execution_id,
@@ -666,6 +739,8 @@ class AgentService:
                 )
 
         except Exception:
+            self._mark_plan_step_failed(state)
+
             logger.exception(
                 "agent_execution_failed "
                 "execution_id=%s "
@@ -753,6 +828,7 @@ class AgentService:
         self,
         action: AgentAction,
     ) -> tuple[bool, Any, list[dict[str, Any]]]:
+
         query = (action.query or "").strip()
 
         if not query:
@@ -763,6 +839,7 @@ class AgentService:
             )
 
         try:
+
             prompt, sources = prepare_rag_question(
                 question=query,
                 top_k=5,
@@ -784,6 +861,7 @@ class AgentService:
             return True, observation, sources
 
         except Exception:
+
             logger.exception(
                 "agent_rag_retrieval_failed"
             )
@@ -908,6 +986,58 @@ class AgentService:
         )
 
     # =========================================================
+    # PLAN PROGRESS
+    # =========================================================
+
+    def _mark_plan_step_started(
+        self,
+        state: AgentState,
+    ) -> None:
+
+        if not state.plan:
+            return
+
+        index = min(
+            state.current_plan_step,
+            len(state.plan) - 1,
+        )
+
+        state.plan_progress[index] = "in_progress"
+
+    def _mark_plan_step_completed(
+        self,
+        state: AgentState,
+    ) -> None:
+
+        if not state.plan:
+            return
+
+        index = min(
+            state.current_plan_step,
+            len(state.plan) - 1,
+        )
+
+        state.plan_progress[index] = "completed"
+
+        if index + 1 < len(state.plan):
+            state.current_plan_step += 1
+
+    def _mark_plan_step_failed(
+        self,
+        state: AgentState,
+    ) -> None:
+
+        if not state.plan:
+            return
+
+        index = min(
+            state.current_plan_step,
+            len(state.plan) - 1,
+        )
+
+        state.plan_progress[index] = "failed"
+
+    # =========================================================
     # RESULTS
     # =========================================================
 
@@ -926,6 +1056,8 @@ class AgentService:
             steps=state.steps,
             step_count=len(state.steps),
             tool_call_count=len(state.tool_calls),
+            plan=state.plan,
+            plan_progress=state.plan_progress,
             retrieved_memories=state.retrieved_memories,
             retrieved_documents=state.retrieved_documents,
         )
@@ -948,6 +1080,8 @@ class AgentService:
             steps=state.steps,
             step_count=len(state.steps),
             tool_call_count=len(state.tool_calls),
+            plan=state.plan,
+            plan_progress=state.plan_progress,
             retrieved_memories=state.retrieved_memories,
             retrieved_documents=state.retrieved_documents,
             error=error,
@@ -980,6 +1114,8 @@ class AgentService:
             steps=state.steps,
             step_count=len(state.steps),
             tool_call_count=len(state.tool_calls),
+            plan=state.plan,
+            plan_progress=state.plan_progress,
             retrieved_memories=state.retrieved_memories,
             retrieved_documents=state.retrieved_documents,
             error=(

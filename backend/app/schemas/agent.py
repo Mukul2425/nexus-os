@@ -49,63 +49,44 @@ class AgentStep(BaseModel):
 
 class AgentState(BaseModel):
     task: str
-
     conversation_id: str
-
     current_step: int = 0
 
-    plan: list[str] = Field(
-        default_factory=list
-    )
+    plan: list[str] = Field(default_factory=list)
+    plan_progress: list[str] = Field(default_factory=list)
+    current_plan_step: int = 0
+    
+    observations: list[Any] = Field(default_factory=list)
+    tool_calls: list[dict[str, Any]] = Field(default_factory=list)
 
-    observations: list[Any] = Field(
-        default_factory=list
-    )
-
-    tool_calls: list[dict[str, Any]] = Field(
-        default_factory=list
-    )
-
-    retrieved_memories: list[dict[str, Any]] = Field(
-        default_factory=list
-    )
-
-    retrieved_documents: list[dict[str, Any]] = Field(
-        default_factory=list
-    )
+    retrieved_memories: list[dict[str, Any]] = Field(default_factory=list)
+    retrieved_documents: list[dict[str, Any]] = Field(default_factory=list)
 
     status: AgentStatus = AgentStatus.CREATED
-
     final_response: str | None = None
 
-    steps: list[AgentStep] = Field(
-        default_factory=list
-    )
+    steps: list[AgentStep] = Field(default_factory=list)
 
 
 class AgentResult(BaseModel):
     execution_id: str
-
     conversation_id: str
-
     status: AgentStatus
 
     response: str | None = None
 
-    steps: list[AgentStep] = Field(
-        default_factory=list
-    )
+    steps: list[AgentStep] = Field(default_factory=list)
 
     step_count: int = 0
-
     tool_call_count: int = 0
 
-    retrieved_memories: list[dict[str, Any]] = Field(
-        default_factory=list
-    )
+    plan: list[str] = Field(default_factory=list)
+    plan_progress: list[str] = Field(default_factory=list)
 
-    retrieved_documents: list[dict[str, Any]] = Field(
-        default_factory=list
-    )
+    retrieved_memories: list[dict[str, Any]] = Field(default_factory=list)
+    retrieved_documents: list[dict[str, Any]] = Field(default_factory=list)
 
     error: str | None = None
+
+
+
