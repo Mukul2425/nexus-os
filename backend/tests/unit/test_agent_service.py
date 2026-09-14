@@ -297,3 +297,22 @@ def test_repeated_action_protection():
 
     assert result.status == AgentStatus.FAILED
     assert result.error == "Repeated agent action detected."
+
+
+
+from unittest.mock import Mock
+
+from app.services.agent.capabilities import (
+    MEMORY_TOOL_NAME,
+    RAG_TOOL_NAME,
+    get_agent_capability_definitions,
+)
+from app.services.agent.service import AgentService
+from app.services.agent.decision import AgentDecisionError, decide_action
+from app.schemas.agent import (
+    AgentActionType,
+)
+from app.schemas.llm import (
+    LLMResponse,
+    ToolCall,
+)
