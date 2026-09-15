@@ -1,48 +1,28 @@
-from unittest.mock import Mock
 
-import pytest
+from unittest.mock import Mock
 
 from app.schemas.agent import AgentStatus
 from app.schemas.llm import LLMResponse, ToolCall
-from app.services.agent.errors import (
-    AgentMaxToolCallsError,
-    AgentTimeoutError,
-    MalformedAgentResponseError,
+from app.services.agent.capabilities import (
+    MEMORY_TOOL_NAME,
+    RAG_TOOL_NAME,
 )
 from app.services.agent.service import AgentService
-from tests.unit.test_agent_service import build_service
+
 
 def test_agent_timeout_is_enforced():
     provider = Mock()
 
-    service = build_service(
-        provider,
-        timeout_seconds=0.001,
-    )
-
-    result = service.run(
-        conversation_id="c1",
-        task="What is FastAPI?",
-    )
-
-    assert result.status == AgentStatus.FAILED
-    assert result.error == "Agent execution timed out."
-
-
-import time
-
-
-def test_agent_timeout_during_provider_call():
-    provider = Mock()
-
     def slow_generate(*args, **kwargs):
+        import time
+
         time.sleep(0.05)
         return LLMResponse(text="done")
 
     provider.generate_with_tools.side_effect = slow_generate
 
-    service = build_service(
-        provider,
+    service = AgentService(
+        llm_provider=provider,
         timeout_seconds=0.01,
     )
 
@@ -54,12 +34,42 @@ def test_agent_timeout_during_provider_call():
     assert result.status == AgentStatus.FAILED
     assert result.error == "Agent execution timed out."
 
+
+
+
+def test_agent_timeout_during_provider_call():
+    provider = Mock()
+
+    def slow_generate(*args, **kwargs):
+        import time
+
+        time.sleep(0.05)
+        return LLMResponse(text="done")
+
+    provider.generate_with_tools.side_effect = slow_generate
+
+    service = AgentService(
+        llm_provider=provider,
+        timeout_seconds=0.01,
+    )
+
+    result = service.run(
+        conversation_id="c1",
+        task="What is FastAPI?",
+    )
+
+    assert result.status == AgentStatus.FAILED
+    assert result.error == "Agent execution timed out."
+
+
 def test_malformed_llm_response_fails_safely():
     provider = Mock()
 
     provider.generate_with_tools.return_value = LLMResponse()
 
-    service = build_service(provider)
+    service = AgentService(
+        llm_provider=provider,
+    )
 
     result = service.run(
         conversation_id="c1",
@@ -68,6 +78,7 @@ def test_malformed_llm_response_fails_safely():
 
     assert result.status == AgentStatus.FAILED
     assert result.error == "Agent produced an invalid response."
+
 
 def test_multiple_tool_calls_are_rejected():
     provider = Mock()
@@ -85,7 +96,9 @@ def test_multiple_tool_calls_are_rejected():
         ]
     )
 
-    service = build_service(provider)
+    service = AgentService(
+        llm_provider=provider,
+    )
 
     result = service.run(
         conversation_id="c1",
@@ -94,6 +107,7 @@ def test_multiple_tool_calls_are_rejected():
 
     assert result.status == AgentStatus.FAILED
     assert result.error == "Agent produced an invalid response."
+
 
 def test_tool_action_without_name_is_rejected():
     provider = Mock()
@@ -107,7 +121,9 @@ def test_tool_action_without_name_is_rejected():
         ]
     )
 
-    service = build_service(provider)
+    service = AgentService(
+        llm_provider=provider,
+    )
 
     result = service.run(
         conversation_id="c1",
@@ -116,6 +132,7 @@ def test_tool_action_without_name_is_rejected():
 
     assert result.status == AgentStatus.FAILED
     assert result.error == "Agent produced an invalid response."
+
 
 def test_unknown_tool_is_controlled():
     provider = Mock()
@@ -129,7 +146,9 @@ def test_unknown_tool_is_controlled():
         ]
     )
 
-    service = build_service(provider)
+    service = AgentService(
+        llm_provider=provider,
+    )
 
     result = service.run(
         conversation_id="c1",
@@ -137,10 +156,12 @@ def test_unknown_tool_is_controlled():
     )
 
     assert result.status == AgentStatus.FAILED
-    assert result.error == "Unknown tool requested."
+    assert result.error == "Unknown tool: not_registered"
+
 
 def test_tool_failure_isolated():
     provider = Mock()
+    executor = Mock()
 
     provider.generate_with_tools.side_effect = [
         LLMResponse(
@@ -156,10 +177,13 @@ def test_tool_failure_isolated():
         ),
     ]
 
-    service, executor = build_service(provider)
-
     executor.execute.side_effect = ValueError(
         "division by zero"
+    )
+
+    service = AgentService(
+        llm_provider=provider,
+        tool_executor=executor,
     )
 
     result = service.run(
@@ -170,8 +194,10 @@ def test_tool_failure_isolated():
     assert result.status == AgentStatus.COMPLETED
     assert result.error is None
 
+
 def test_max_tool_calls_is_enforced_before_loop_detection():
     provider = Mock()
+    executor = Mock()
 
     provider.generate_with_tools.return_value = LLMResponse(
         tool_calls=[
@@ -182,8 +208,16 @@ def test_max_tool_calls_is_enforced_before_loop_detection():
         ]
     )
 
-    service, _ = build_service(
-        provider,
+    executor.execute.return_value = {
+        "success": True,
+        "tool_name": "calculator",
+        "result": 2,
+        "error": None,
+    }
+
+    service = AgentService(
+        llm_provider=provider,
+        tool_executor=executor,
         max_tool_calls=1,
         max_repeated_actions=10,
     )
@@ -194,10 +228,14 @@ def test_max_tool_calls_is_enforced_before_loop_detection():
     )
 
     assert result.status == AgentStatus.FAILED
-    assert result.error == "Maximum tool calls exceeded."
+    assert result.error == (
+        "The maximum number of tool calls was reached."
+    )
+
 
 def test_repeated_action_is_detected():
     provider = Mock()
+    executor = Mock()
 
     provider.generate_with_tools.return_value = LLMResponse(
         tool_calls=[
@@ -208,8 +246,16 @@ def test_repeated_action_is_detected():
         ]
     )
 
-    service, _ = build_service(
-        provider,
+    executor.execute.return_value = {
+        "success": True,
+        "tool_name": "calculator",
+        "result": 2,
+        "error": None,
+    }
+
+    service = AgentService(
+        llm_provider=provider,
+        tool_executor=executor,
         max_tool_calls=10,
         max_repeated_actions=2,
     )
@@ -222,9 +268,8 @@ def test_repeated_action_is_detected():
     assert result.status == AgentStatus.FAILED
     assert result.error == "Repeated agent action detected."
 
-def test_memory_failure_does_not_crash_agent(
-    db,
-):
+
+def test_memory_failure_does_not_crash_agent(db):
     provider = Mock()
     memory = Mock()
 
@@ -236,7 +281,7 @@ def test_memory_failure_does_not_crash_agent(
         LLMResponse(
             tool_calls=[
                 ToolCall(
-                    name="memory",
+                    name=MEMORY_TOOL_NAME,
                     arguments={"query": "preferred language"},
                 )
             ]
@@ -258,18 +303,17 @@ def test_memory_failure_does_not_crash_agent(
     )
 
     assert result.status == AgentStatus.COMPLETED
+    assert result.error is None
 
-def test_rag_failure_does_not_crash_agent(
-    monkeypatch,
-    db,
-):
+
+def test_rag_failure_does_not_crash_agent(monkeypatch, db):
     provider = Mock()
 
     provider.generate_with_tools.side_effect = [
         LLMResponse(
             tool_calls=[
                 ToolCall(
-                    name="rag",
+                    name=RAG_TOOL_NAME,
                     arguments={"query": "provider architecture"},
                 )
             ]
@@ -281,7 +325,6 @@ def test_rag_failure_does_not_crash_agent(
 
     def failing_rag(*args, **kwargs):
         raise RuntimeError("RAG unavailable")
-    
 
     monkeypatch.setattr(
         "app.services.agent.service.prepare_rag_question",
@@ -300,3 +343,4 @@ def test_rag_failure_does_not_crash_agent(
 
     assert result.status == AgentStatus.COMPLETED
     assert result.error is None
+

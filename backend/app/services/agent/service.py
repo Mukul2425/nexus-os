@@ -195,7 +195,12 @@ class AgentService:
                         error="Agent execution timed out.",
                     )
 
-                if state.current_step >= self.max_steps:
+             
+                if state.current_step >= getattr(
+                    self,
+                    "max_agent_steps",
+                    self.max_steps,
+                ):
                     return self._max_steps_reached(
                         state=state,
                         execution_id=execution_id,
@@ -376,7 +381,7 @@ class AgentService:
                     return self._fail(
                         state=state,
                         execution_id=execution_id,
-                        error="Maximum tool calls exceeded.",
+                        error="The maximum number of tool calls was reached.",
                     )
 
                 fingerprint = self._action_fingerprint(
@@ -681,7 +686,7 @@ class AgentService:
                             step_number=step_number,
                             action=action,
                             success=False,
-                            error="Unknown tool requested.",
+                            error=f"Unknown tool: {tool_name}",
                         )
 
                         state.steps.append(step)
@@ -689,7 +694,7 @@ class AgentService:
                         return self._fail(
                             state=state,
                             execution_id=execution_id,
-                            error="Unknown tool requested.",
+                            error=f"Unknown tool: {tool_name}",
                         )
 
                     logger.info(

@@ -9,7 +9,10 @@ from app.services.agent.capabilities import (
     MEMORY_TOOL_NAME,
     RAG_TOOL_NAME,
 )
-from app.services.agent.errors import MalformedAgentResponseError
+
+
+class AgentDecisionError(Exception):
+    """Raised when the LLM response cannot be converted into an agent action."""
 
 
 def decide_action(response: LLMResponse) -> AgentAction:
@@ -21,14 +24,14 @@ def decide_action(response: LLMResponse) -> AgentAction:
     """
 
     if response is None:
-        raise MalformedAgentResponseError(
+        raise AgentDecisionError(
             "LLM returned no response."
         )
 
     tool_calls = response.tool_calls or []
 
     if len(tool_calls) > 1:
-        raise MalformedAgentResponseError(
+        raise AgentDecisionError(
             "Agent returned multiple actions; exactly one action is allowed."
         )
 
@@ -36,7 +39,7 @@ def decide_action(response: LLMResponse) -> AgentAction:
         tool_call = tool_calls[0]
 
         if not tool_call.name:
-            raise MalformedAgentResponseError(
+            raise AgentDecisionError(
                 "Agent tool action is missing a tool name."
             )
 
@@ -46,7 +49,7 @@ def decide_action(response: LLMResponse) -> AgentAction:
             query = arguments.get("query")
 
             if not isinstance(query, str) or not query.strip():
-                raise MalformedAgentResponseError(
+                raise AgentDecisionError(
                     "Memory retrieval requires a non-empty query."
                 )
 
@@ -60,7 +63,7 @@ def decide_action(response: LLMResponse) -> AgentAction:
             query = arguments.get("query")
 
             if not isinstance(query, str) or not query.strip():
-                raise MalformedAgentResponseError(
+                raise AgentDecisionError(
                     "RAG retrieval requires a non-empty query."
                 )
 
@@ -85,6 +88,7 @@ def decide_action(response: LLMResponse) -> AgentAction:
                 response=text,
             )
 
-    raise MalformedAgentResponseError(
+    raise AgentDecisionError(
         "LLM response did not contain a valid answer or action."
     )
+
