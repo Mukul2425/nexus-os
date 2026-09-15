@@ -1,4 +1,4 @@
-
+# agent/service.py
 import json
 import time
 import uuid
@@ -25,6 +25,12 @@ from app.services.agent.capabilities import (
 from app.services.agent.decision import (
     AgentDecisionError,
     decide_action,
+)
+from app.services.agent.config import AgentSafetyConfig
+from app.services.agent.errors import (
+    AgentTimeoutError,
+    InvalidAgentActionError,
+    MalformedAgentResponseError,
 )
 from app.services.llm.provider import LLMProvider
 from app.services.memory.retriever import MemoryRetriever
@@ -56,6 +62,7 @@ class AgentService:
         max_tool_calls: int = MAX_TOOL_CALLS,
         timeout_seconds: float = AGENT_TIMEOUT_SECONDS,
         max_repeated_actions: int = MAX_REPEATED_ACTIONS,
+        safety_config: AgentSafetyConfig | None = None,
     ):
         self.llm_provider = llm_provider
 
@@ -86,10 +93,23 @@ class AgentService:
         else:
             self.memory_retriever = None
 
-        self.max_steps = max_steps
-        self.max_tool_calls = max_tool_calls
-        self.timeout_seconds = timeout_seconds
-        self.max_repeated_actions = max_repeated_actions
+        self.safety_config = (
+            safety_config
+            if safety_config is not None
+            else AgentSafetyConfig(
+                max_agent_steps=max_steps,
+                max_tool_calls=max_tool_calls,
+                timeout_seconds=timeout_seconds,
+                max_repeated_actions=max_repeated_actions,
+            )
+        )
+
+        self.max_steps = self.safety_config.max_agent_steps
+        self.max_tool_calls = self.safety_config.max_tool_calls
+        self.timeout_seconds = self.safety_config.timeout_seconds
+        self.max_repeated_actions = (
+            self.safety_config.max_repeated_actions
+        )
 
     # =========================================================
     # PUBLIC API
@@ -118,6 +138,7 @@ class AgentService:
         # -----------------------------------------------------
 
         plan = self.planner.create_plan(task)
+        plan = plan[: self.safety_config.max_plan_steps]
 
         state.plan = plan
         state.plan_progress = ["pending"] * len(plan)
@@ -156,17 +177,25 @@ class AgentService:
                 if elapsed >= self.timeout_seconds:
                     self._mark_plan_step_failed(state)
 
+                    logger.warning(
+                        "agent_timeout "
+                        "execution_id=%s "
+                        "request_id=%s "
+                        "conversation_id=%s "
+                        "step=%d",
+                        execution_id,
+                        request_id,
+                        conversation_id,
+                        state.current_step,
+                    )
+
                     return self._fail(
                         state=state,
                         execution_id=execution_id,
                         error="Agent execution timed out.",
                     )
 
-                if state.current_step >= getattr(
-                    self,
-                    "max_agent_steps",
-                    self.max_steps,
-                ):
+                if state.current_step >= self.max_steps:
                     return self._max_steps_reached(
                         state=state,
                         execution_id=execution_id,
@@ -201,12 +230,36 @@ class AgentService:
                 )
 
                 try:
+                    self._check_timeout(started_at)
+
                     response = (
                         self.llm_provider.generate_with_tools(
                             messages,
                             tool_definitions,
                             tool_results or None,
                         )
+                    )
+
+                    self._check_timeout(started_at)
+                except AgentTimeoutError:
+                    self._mark_plan_step_failed(state)
+
+                    logger.warning(
+                        "agent_timeout "
+                        "execution_id=%s "
+                        "request_id=%s "
+                        "conversation_id=%s "
+                        "step=%d",
+                        execution_id,
+                        request_id,
+                        conversation_id,
+                        step_number,
+                    )
+
+                    return self._fail(
+                        state=state,
+                        execution_id=execution_id,
+                        error="Agent execution timed out.",
                     )
                 except Exception as exc:
                     self._mark_plan_step_failed(state)
@@ -235,7 +288,28 @@ class AgentService:
 
                 try:
                     action = decide_action(response)
-                except AgentDecisionError as exc:
+                    self._validate_action(action)
+                except MalformedAgentResponseError:
+                    self._mark_plan_step_failed(state)
+
+                    logger.exception(
+                        "agent_malformed_response "
+                        "execution_id=%s "
+                        "request_id=%s "
+                        "conversation_id=%s "
+                        "step=%d",
+                        execution_id,
+                        request_id,
+                        conversation_id,
+                        step_number,
+                    )
+
+                    return self._fail(
+                        state=state,
+                        execution_id=execution_id,
+                        error="Agent produced an invalid response.",
+                    )
+                except AgentDecisionError:
                     self._mark_plan_step_failed(state)
 
                     logger.exception(
@@ -254,7 +328,28 @@ class AgentService:
                     return self._fail(
                         state=state,
                         execution_id=execution_id,
-                        error=str(exc),
+                        error="Agent produced an invalid response.",
+                    )
+                except InvalidAgentActionError:
+                    self._mark_plan_step_failed(state)
+
+                    logger.exception(
+                        "agent_execution_failed "
+                        "execution_id=%s "
+                        "request_id=%s "
+                        "conversation_id=%s "
+                        "step=%d "
+                        "reason=invalid_action",
+                        execution_id,
+                        request_id,
+                        conversation_id,
+                        step_number,
+                    )
+
+                    return self._fail(
+                        state=state,
+                        execution_id=execution_id,
+                        error="Agent produced an invalid response.",
                     )
 
                 logger.info(
@@ -271,18 +366,6 @@ class AgentService:
                     action.type.value,
                 )
 
-                fingerprint = self._action_fingerprint(
-                    action
-                )
-
-                repeated_actions[fingerprint] = (
-                    repeated_actions.get(
-                        fingerprint,
-                        0,
-                    )
-                    + 1
-                )
-
                 if (
                     action.type == AgentActionType.TOOL
                     and len(state.tool_calls)
@@ -293,15 +376,16 @@ class AgentService:
                     return self._fail(
                         state=state,
                         execution_id=execution_id,
-                        error=(
-                            "The maximum number of tool "
-                            "calls was reached."
-                        ),
+                        error="Maximum tool calls exceeded.",
                     )
 
-                if (
-                    repeated_actions[fingerprint]
-                    > self.max_repeated_actions
+                fingerprint = self._action_fingerprint(
+                    action
+                )
+
+                if self._is_repeated_action(
+                    fingerprint,
+                    repeated_actions,
                 ):
                     self._mark_plan_step_failed(state)
 
@@ -310,8 +394,7 @@ class AgentService:
                         action=action,
                         success=False,
                         error=(
-                            "Repeated identical agent action "
-                            "detected."
+                            "Repeated agent action detected."
                         ),
                     )
 
@@ -410,6 +493,8 @@ class AgentService:
 
                 if action.type == AgentActionType.MEMORY:
 
+                    self._check_timeout(started_at)
+
                     observation = self._execute_memory(
                         execution_id=execution_id,
                         request_id=request_id,
@@ -417,6 +502,8 @@ class AgentService:
                         step_number=step_number,
                         query=action.query or "",
                     )
+
+                    self._check_timeout(started_at)
 
                     step = AgentStep(
                         step_number=step_number,
@@ -476,9 +563,13 @@ class AgentService:
 
                 if action.type == AgentActionType.RAG:
 
+                    self._check_timeout(started_at)
+
                     success, rag_observation, sources = (
                         self._execute_rag(action)
                     )
+
+                    self._check_timeout(started_at)
 
                     if success:
                         observation = {
@@ -502,7 +593,7 @@ class AgentService:
                             "success": False,
                             "prompt": "",
                             "sources": [],
-                            "error": "RAG retrieval failed",
+                            "error": "RAG retrieval unavailable.",
                         }
 
                         self._mark_plan_step_failed(
@@ -573,13 +664,24 @@ class AgentService:
                     ):
                         self._mark_plan_step_failed(state)
 
+                        logger.warning(
+                            "agent_execution_failed "
+                            "execution_id=%s "
+                            "request_id=%s "
+                            "conversation_id=%s "
+                            "step=%d "
+                            "reason=unknown_tool",
+                            execution_id,
+                            request_id,
+                            conversation_id,
+                            step_number,
+                        )
+
                         step = AgentStep(
                             step_number=step_number,
                             action=action,
                             success=False,
-                            error=(
-                                f"Unknown tool: {tool_name}"
-                            ),
+                            error="Unknown tool requested.",
                         )
 
                         state.steps.append(step)
@@ -587,9 +689,7 @@ class AgentService:
                         return self._fail(
                             state=state,
                             execution_id=execution_id,
-                            error=(
-                                f"Unknown tool: {tool_name}"
-                            ),
+                            error="Unknown tool requested.",
                         )
 
                     logger.info(
@@ -607,6 +707,8 @@ class AgentService:
                     )
 
                     try:
+                        self._check_timeout(started_at)
+
                         execution = (
                             self.tool_executor.execute(
                                 tool_name,
@@ -614,15 +716,37 @@ class AgentService:
                             )
                         )
 
-                    except Exception as exc:
+                        self._check_timeout(started_at)
+
+                    except AgentTimeoutError:
+                        self._mark_plan_step_failed(state)
+
+                        logger.warning(
+                            "agent_timeout "
+                            "execution_id=%s "
+                            "request_id=%s "
+                            "conversation_id=%s "
+                            "step=%d",
+                            execution_id,
+                            request_id,
+                            conversation_id,
+                            step_number,
+                        )
+
+                        return self._fail(
+                            state=state,
+                            execution_id=execution_id,
+                            error="Agent execution timed out.",
+                        )
+
+                    except (TypeError, ValueError):
                         logger.exception(
-                            "agent_tool_execution_complete "
+                            "agent_tool_execution_failed "
                             "execution_id=%s "
                             "request_id=%s "
                             "conversation_id=%s "
                             "step=%d "
-                            "tool=%s "
-                            "success=false",
+                            "tool=%s",
                             execution_id,
                             request_id,
                             conversation_id,
@@ -634,10 +758,29 @@ class AgentService:
                             "success": False,
                             "tool_name": tool_name,
                             "result": None,
-                            "error": (
-                                "The requested tool "
-                                "could not be executed."
-                            ),
+                            "error": "Invalid tool arguments.",
+                        }
+
+                    except Exception:
+                        logger.exception(
+                            "agent_tool_execution_failed "
+                            "execution_id=%s "
+                            "request_id=%s "
+                            "conversation_id=%s "
+                            "step=%d "
+                            "tool=%s",
+                            execution_id,
+                            request_id,
+                            conversation_id,
+                            step_number,
+                            tool_name,
+                        )
+
+                        execution = {
+                            "success": False,
+                            "tool_name": tool_name,
+                            "result": None,
+                            "error": "Tool execution failed.",
                         }
 
                     tool_success = execution.get(
@@ -738,6 +881,27 @@ class AgentService:
                     ),
                 )
 
+        except AgentTimeoutError:
+            self._mark_plan_step_failed(state)
+
+            logger.warning(
+                "agent_timeout "
+                "execution_id=%s "
+                "request_id=%s "
+                "conversation_id=%s "
+                "step=%d",
+                execution_id,
+                request_id,
+                conversation_id,
+                state.current_step,
+            )
+
+            return self._fail(
+                state=state,
+                execution_id=execution_id,
+                error="Agent execution timed out.",
+            )
+
         except Exception:
             self._mark_plan_step_failed(state)
 
@@ -815,8 +979,7 @@ class AgentService:
                 "success": False,
                 "memories": [],
                 "error": (
-                    "Memory retrieval failed. "
-                    "Continue without memory context."
+                    "Memory retrieval unavailable."
                 ),
             }
 
@@ -985,6 +1148,20 @@ class AgentService:
             default=str,
         )
 
+    def _is_repeated_action(
+        self,
+        fingerprint: str,
+        action_counts: dict[str, int],
+    ) -> bool:
+        count = action_counts.get(fingerprint, 0) + 1
+        action_counts[fingerprint] = count
+
+        return count > self.max_repeated_actions
+
+    def _check_timeout(self, started_at: float) -> None:
+        if time.monotonic() - started_at >= self.timeout_seconds:
+            raise AgentTimeoutError("Agent execution timed out.")
+
     # =========================================================
     # PLAN PROGRESS
     # =========================================================
@@ -1123,3 +1300,37 @@ class AgentService:
                 "of execution steps."
             ),
         )
+    def _validate_action(self, action: AgentAction) -> None:
+        if action is None:
+            raise InvalidAgentActionError(
+                "Agent selected no action."
+            )
+
+        if action.type == AgentActionType.TOOL:
+            if not action.tool_name:
+                raise InvalidAgentActionError(
+                    "Tool action is missing tool_name."
+                )
+
+        elif action.type in (
+            AgentActionType.MEMORY,
+            AgentActionType.RAG,
+        ):
+            if not action.query or not action.query.strip():
+                raise InvalidAgentActionError(
+                    f"{action.type.value} action requires a query."
+                )
+
+        elif action.type == AgentActionType.ANSWER:
+            if not action.response or not action.response.strip():
+                raise InvalidAgentActionError(
+                    "Answer action requires a response."
+                )
+
+        elif action.type == AgentActionType.STOP:
+            return
+
+        else:
+            raise InvalidAgentActionError(
+                "Agent selected an unsupported action."
+            )

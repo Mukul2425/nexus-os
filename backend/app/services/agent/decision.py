@@ -1,3 +1,4 @@
+
 from app.schemas.agent import (
     AgentAction,
     AgentActionType,
@@ -8,10 +9,7 @@ from app.services.agent.capabilities import (
     MEMORY_TOOL_NAME,
     RAG_TOOL_NAME,
 )
-
-
-class AgentDecisionError(Exception):
-    """Raised when the LLM response cannot be converted to an agent action."""
+from app.services.agent.errors import MalformedAgentResponseError
 
 
 def decide_action(response: LLMResponse) -> AgentAction:
@@ -22,18 +20,24 @@ def decide_action(response: LLMResponse) -> AgentAction:
     v1.0 intentionally executes one action at a time.
     """
 
-    if response.tool_calls:
+    if response is None:
+        raise MalformedAgentResponseError(
+            "LLM returned no response."
+        )
 
-        if len(response.tool_calls) != 1:
-            raise AgentDecisionError(
-                "Agent must select exactly one action at a time."
-            )
+    tool_calls = response.tool_calls or []
 
-        tool_call = response.tool_calls[0]
+    if len(tool_calls) > 1:
+        raise MalformedAgentResponseError(
+            "Agent returned multiple actions; exactly one action is allowed."
+        )
+
+    if tool_calls:
+        tool_call = tool_calls[0]
 
         if not tool_call.name:
-            raise AgentDecisionError(
-                "Agent selected a tool without a name."
+            raise MalformedAgentResponseError(
+                "Agent tool action is missing a tool name."
             )
 
         arguments = tool_call.arguments or {}
@@ -42,7 +46,7 @@ def decide_action(response: LLMResponse) -> AgentAction:
             query = arguments.get("query")
 
             if not isinstance(query, str) or not query.strip():
-                raise AgentDecisionError(
+                raise MalformedAgentResponseError(
                     "Memory retrieval requires a non-empty query."
                 )
 
@@ -56,7 +60,7 @@ def decide_action(response: LLMResponse) -> AgentAction:
             query = arguments.get("query")
 
             if not isinstance(query, str) or not query.strip():
-                raise AgentDecisionError(
+                raise MalformedAgentResponseError(
                     "RAG retrieval requires a non-empty query."
                 )
 
@@ -72,12 +76,15 @@ def decide_action(response: LLMResponse) -> AgentAction:
             arguments=arguments,
         )
 
-    if response.text and response.text.strip():
-        return AgentAction(
-            type=AgentActionType.ANSWER,
-            response=response.text,
-        )
+    if response.text is not None:
+        text = response.text.strip()
 
-    raise AgentDecisionError(
-        "Agent produced no actionable response."
+        if text:
+            return AgentAction(
+                type=AgentActionType.ANSWER,
+                response=text,
+            )
+
+    raise MalformedAgentResponseError(
+        "LLM response did not contain a valid answer or action."
     )
