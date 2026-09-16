@@ -14,7 +14,7 @@ from app.core.exception_handlers import nexus_exception_handler
 from app.api.documents import router as documents_router
 from app.models import Memory
 from app.api.memories import router as memories_router
-
+from app.api.agent import router as agent_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -38,3 +38,4 @@ app.include_router(
     documents_router
 )
 app.include_router(memories_router)
+app.include_router(agent_router)

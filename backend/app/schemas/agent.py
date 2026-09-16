@@ -81,7 +81,7 @@ class AgentResult(BaseModel):
     tool_call_count: int = 0
 
     plan: list[str] = Field(default_factory=list)
-    plan_progress: list[str] = Field(default_factory=list)
+    plan_progress: list[str | dict[str, Any]] = Field(default_factory=list)
 
     retrieved_memories: list[dict[str, Any]] = Field(default_factory=list)
     retrieved_documents: list[dict[str, Any]] = Field(default_factory=list)
