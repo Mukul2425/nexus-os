@@ -992,6 +992,9 @@ class AgentService:
     # RAG
     # =========================================================
 
+
+
+    
     def _execute_rag(
         self,
         action: AgentAction,
@@ -1007,13 +1010,13 @@ class AgentService:
             )
 
         try:
-
-            prompt, sources = prepare_rag_question(
+            rag_result = prepare_rag_question(
                 question=query,
                 top_k=5,
             )
 
-            sources = sources or []
+            prompt = rag_result["prompt"]
+            sources = rag_result.get("sources") or []
 
             observation = {
                 "prompt": prompt,
@@ -1029,7 +1032,6 @@ class AgentService:
             return True, observation, sources
 
         except Exception:
-
             logger.exception(
                 "agent_rag_retrieval_failed"
             )
@@ -1039,6 +1041,58 @@ class AgentService:
                 None,
                 [],
             )
+
+    
+
+
+
+    # def _execute_rag(
+    #     self,
+    #     action: AgentAction,
+    # ) -> tuple[bool, Any, list[dict[str, Any]]]:
+
+    #     query = (action.query or "").strip()
+
+    #     if not query:
+    #         return (
+    #             False,
+    #             None,
+    #             [],
+    #         )
+
+    #     try:
+
+    #         prompt, sources = prepare_rag_question(
+    #             question=query,
+    #             top_k=5,
+    #         )
+
+    #         sources = sources or []
+
+    #         observation = {
+    #             "prompt": prompt,
+    #             "sources": sources,
+    #         }
+
+    #         logger.info(
+    #             "agent_rag_retrieval_complete "
+    #             "source_count=%d",
+    #             len(sources),
+    #         )
+
+    #         return True, observation, sources
+
+    #     except Exception:
+
+    #         logger.exception(
+    #             "agent_rag_retrieval_failed"
+    #         )
+
+    #         return (
+    #             False,
+    #             None,
+    #             [],
+    #         )
 
     # =========================================================
     # OBSERVATIONS
@@ -1339,3 +1393,6 @@ class AgentService:
             raise InvalidAgentActionError(
                 "Agent selected an unsupported action."
             )
+
+
+

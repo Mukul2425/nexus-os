@@ -215,17 +215,16 @@ def test_agent_retrieves_rag(
 
     monkeypatch.setattr(
         "app.services.agent.service.prepare_rag_question",
-        lambda question, top_k: (
-            "Relevant context:\n"
-            "Nexus uses an LLMProvider abstraction.",
-            [
-                {
-                    "document": "architecture.md",
-                    "document_id": "doc-1",
-                    "chunk_id": "chunk-1",
-                }
-            ],
-        ),
+        lambda question, top_k: {
+    "prompt": "Relevant context...",
+    "sources": [
+        {
+            "document": "architecture.md",
+            "document_id": "doc-1",
+            "chunk_id": "chunk-1",
+        }
+    ],
+}
     )
 
     service = AgentService(
@@ -274,15 +273,16 @@ def test_rag_observation_is_fed_back_to_agent(
 
     monkeypatch.setattr(
         "app.services.agent.service.prepare_rag_question",
-        lambda question, top_k: (
-            "Nexus documentation says the provider "
-            "abstraction isolates LLM vendors.",
-            [
-                {
-                    "document": "provider.md",
-                }
-            ],
-        ),
+        lambda question, top_k: {
+    "prompt": "Relevant context...",
+    "sources": [
+        {
+            "document": "architecture.md",
+            "document_id": "doc-1",
+            "chunk_id": "chunk-1",
+        }
+    ],
+}
     )
 
     service = AgentService(
@@ -306,7 +306,7 @@ def test_rag_observation_is_fed_back_to_agent(
     messages = second_call.args[0]
 
     assert any(
-        "provider abstraction isolates LLM vendors"
+        "Relevant context..."
         in message.content
         for message in messages
     )
@@ -386,16 +386,16 @@ def test_agent_can_combine_memory_and_rag(
 
     monkeypatch.setattr(
         "app.services.agent.service.prepare_rag_question",
-        lambda question, top_k: (
-            "Nexus documentation recommends "
-            "FastAPI for the backend.",
-            [
-                {
-                    "document": "nexus.md",
-                    "chunk_id": "chunk-1",
-                }
-            ],
-        ),
+        lambda question, top_k: {
+    "prompt": "Relevant context...",
+    "sources": [
+        {
+            "document": "architecture.md",
+            "document_id": "doc-1",
+            "chunk_id": "chunk-1",
+        }
+    ],
+}
     )
 
     fake_provider.generate_with_tools.side_effect = [

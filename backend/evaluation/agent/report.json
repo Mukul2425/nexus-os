@@ -1,0 +1,217 @@
+{
+  "version": "1.0",
+  "metrics": {
+    "total_tasks": 10,
+    "successful_tasks": 1,
+    "task_success_rate": 0.1,
+    "tool_selection_accuracy": 0.7,
+    "tool_execution_success_rate": 1.0,
+    "average_steps": 0.3,
+    "average_unnecessary_tool_calls": 0.0,
+    "maximum_step_failures": 0,
+    "average_answer_relevance": 0.1,
+    "average_groundedness": 0.7
+  },
+  "tasks": [
+    {
+      "task_id": "direct_answer_001",
+      "category": "direct_answer",
+      "passed": true,
+      "status_correct": true,
+      "action_sequence_correct": true,
+      "tool_selection_correct": true,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 1,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 1.0,
+      "groundedness": 1.0,
+      "errors": []
+    },
+    {
+      "task_id": "calculator_001",
+      "category": "tool",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": true,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 1,
+      "tool_call_count": 1,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 1.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['tool', 'answer'], actual=['tool'].",
+        "Final answer is missing one or more required keywords."
+      ]
+    },
+    {
+      "task_id": "calculator_002",
+      "category": "tool",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": false,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 0,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 1.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['tool', 'answer'], actual=[].",
+        "Tool selection mismatch: expected=['calculator'], actual=[].",
+        "Too few tool calls: 0 < 1.",
+        "Final answer is missing one or more required keywords."
+      ]
+    },
+    {
+      "task_id": "time_001",
+      "category": "tool",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": false,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 0,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 1.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['tool', 'answer'], actual=[].",
+        "Tool selection mismatch: expected=['time'], actual=[].",
+        "Too few tool calls: 0 < 1."
+      ]
+    },
+    {
+      "task_id": "rag_001",
+      "category": "rag",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": true,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 1,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 0.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['rag', 'answer'], actual=['rag'].",
+        "RAG was required but no retrieved documents were available."
+      ]
+    },
+    {
+      "task_id": "rag_002",
+      "category": "rag",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": true,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 0,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 0.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['rag', 'answer'], actual=[].",
+        "RAG was required but no retrieved documents were available."
+      ]
+    },
+    {
+      "task_id": "memory_001",
+      "category": "memory",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": true,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 0,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 1.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['memory', 'answer'], actual=[].",
+        "Memory retrieval was required but no memories were returned."
+      ]
+    },
+    {
+      "task_id": "multi_step_001",
+      "category": "multi_step",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": false,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 0,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 1.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['tool', 'tool', 'answer'], actual=[].",
+        "Tool selection mismatch: expected=['time', 'calculator'], actual=[].",
+        "Too few tool calls: 0 < 2."
+      ]
+    },
+    {
+      "task_id": "direct_answer_002",
+      "category": "direct_answer",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": true,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 0,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 1.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['answer'], actual=[].",
+        "Final answer is missing one or more required keywords."
+      ]
+    },
+    {
+      "task_id": "mixed_001",
+      "category": "mixed",
+      "passed": false,
+      "status_correct": false,
+      "action_sequence_correct": false,
+      "tool_selection_correct": true,
+      "tool_execution_success": true,
+      "unnecessary_tool_calls": 0,
+      "step_count": 0,
+      "tool_call_count": 0,
+      "max_step_failure": false,
+      "answer_relevance": 0.0,
+      "groundedness": 0.0,
+      "errors": [
+        "Expected status 'completed', got 'failed'.",
+        "Action sequence mismatch: expected=['rag', 'answer'], actual=[].",
+        "RAG was required but no retrieved documents were available."
+      ]
+    }
+  ]
+}
