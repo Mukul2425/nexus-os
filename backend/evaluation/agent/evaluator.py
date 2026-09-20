@@ -320,7 +320,7 @@ class AgentEvaluator:
             r"\s+",
             " ",
             str(value).lower().strip(),
-        )
+        ).replace(",", "")
 
     @staticmethod
     def _calculate_metrics(

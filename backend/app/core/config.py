@@ -30,6 +30,30 @@ class Settings(BaseSettings):
         default="sqlite:///./nexus.db"
     )
 
+    # ---------------------------------------------------------
+    # Gemini request safety
+    # ---------------------------------------------------------
+
+    GEMINI_TIMEOUT_SECONDS: float = Field(
+        default=20.0,
+        gt=0,
+    )
+
+    GEMINI_MAX_RETRIES: int = Field(
+        default=1,
+        ge=1,
+    )
+
+    GEMINI_RETRY_INITIAL_DELAY_SECONDS: float = Field(
+        default=1.0,
+        ge=0,
+    )
+
+    GEMINI_RETRY_MAX_DELAY_SECONDS: float = Field(
+        default=3.0,
+        ge=0,
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -4,7 +4,7 @@ from evaluation.agent.models import AgentEvaluationTask
 from app.services.agent.service import AgentService
 from app.services.llm.factory import create_llm_provider
 from app.database.session import SessionLocal
-
+from app.services.memory.retriever import MemoryRetriever
 
 def execute_agent_task(
     task: AgentEvaluationTask,
@@ -19,6 +19,7 @@ def execute_agent_task(
         service = AgentService(
             db=db,
             llm_provider=create_llm_provider(),
+            memory_retriever=MemoryRetriever(db),
         )
 
         return service.run(

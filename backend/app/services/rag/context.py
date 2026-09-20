@@ -4,7 +4,7 @@ from app.services.rag.retriever import retrieve
 def build_rag_context(
     question: str,
     top_k: int = 5,
-    max_distance: float = 0.3,
+    max_distance: float = 0.9,
 ):
     results = retrieve(
         question,

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from evaluation.agent.app_runner import execute_agent_task
 from evaluation.agent.evaluator import AgentEvaluator
-from evaluation.agent.runner import AgentEvaluationRunner
+from evaluation.agent.runner import AgentEvaluationRunner, EvaluationInfrastructureError
 
 
 def main() -> None:
@@ -21,7 +21,11 @@ def main() -> None:
         evaluator=AgentEvaluator(),
     )
 
-    report = runner.run(tasks)
+    try:
+        report = runner.run(tasks)
+    except EvaluationInfrastructureError as exc:
+        print(f"\nEvaluation stopped: {exc}")
+        return
 
     output_path.parent.mkdir(
         parents=True,

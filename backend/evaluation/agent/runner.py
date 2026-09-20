@@ -14,6 +14,9 @@ from evaluation.agent.models import (
 )
 
 
+class EvaluationInfrastructureError(RuntimeError):
+    """Raised when live evaluation cannot continue safely."""
+
 class AgentEvaluationRunner:
     """
     Loads agent evaluation cases, executes them, and evaluates
@@ -112,7 +115,33 @@ class AgentEvaluationRunner:
             )
 
         return tasks
+    @staticmethod
+    def _is_provider_failure(
+        result: AgentResult,
+    ) -> bool:
+        if result.status.value != "failed":
+            return False
 
+        error = (result.error or "").lower()
+
+        provider_markers = (
+            "unable to generate a response",
+            "llm provider rate limit",
+            "llm provider is temporarily unavailable",
+            "llm provider request timed out",
+            "llm provider returned a server error",
+            "llm provider returned a gateway error",
+            "llm provider request failed",
+            "authentication failed",
+        )
+
+        return any(
+            marker in error
+            for marker in provider_markers
+        )
+
+
+    
     def run(
         self,
         tasks: list[AgentEvaluationTask],
@@ -120,12 +149,22 @@ class AgentEvaluationRunner:
         results: dict[str, AgentResult] = {}
 
         for task in tasks:
-            results[task.id] = self.execute(task)
+            result = self.execute(task)
+            results[task.id] = result
+
+            if self._is_provider_failure(result):
+                raise EvaluationInfrastructureError(
+                    "Evaluation stopped because the LLM provider "
+                    "is unavailable or rate-limited."
+                )
 
         return self.evaluator.evaluate(
             tasks=tasks,
             results=results,
         )
+
+    
+    
 
 
 def build_parser() -> argparse.ArgumentParser:

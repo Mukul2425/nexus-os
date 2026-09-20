@@ -16,7 +16,12 @@ from app.schemas.agent import (
     AgentStep,
 )
 from app.schemas.chat import ChatMessage
-from app.schemas.llm import ToolResult
+from app.schemas.llm import (
+    ToolCall,
+    ToolResult,
+    LLMResponse,
+)
+
 from app.services.agent.capabilities import (
     MEMORY_TOOL_NAME,
     RAG_TOOL_NAME,
@@ -40,6 +45,7 @@ from app.tools.factory import (
     create_tool_registry,
 )
 from app.services.agent.planner import AgentPlanner
+from app.core.exceptions import LLMProviderError
 
 
 MAX_AGENT_STEPS = 10
@@ -163,8 +169,10 @@ class AgentService:
         ]
 
         tool_results: list[ToolResult] = []
-
+        pending_tool_calls: list[ToolCall] = []
+        pending_tool_call_id: str | None = None
         repeated_actions: dict[str, int] = {}
+
 
         try:
 
@@ -233,66 +241,121 @@ class AgentService:
                     self.tool_registry.get_definitions()
                     + get_agent_capability_definitions()
                 )
+                
 
-                try:
-                    self._check_timeout(started_at)
 
-                    response = (
-                        self.llm_provider.generate_with_tools(
-                            messages,
-                            tool_definitions,
-                            tool_results or None,
+                if pending_tool_calls:
+                    # Gemini already returned multiple tool calls.
+                    # Execute the remaining calls without asking Gemini again.
+                    tool_call = pending_tool_calls.pop(0)
+                    pending_tool_call_id = tool_call.id
+
+                    response_for_action = LLMResponse(
+                        text=None,
+                        tool_calls=[tool_call],
+                    )
+
+                else: 
+
+                    try:
+                        self._check_timeout(started_at)
+                        
+                        results_for_provider = tool_results or None
+                        tool_results = []
+                        response = (
+                            self.llm_provider.generate_with_tools(
+                                messages,
+                                tool_definitions,
+                                results_for_provider,
+                            )
                         )
-                    )
 
-                    self._check_timeout(started_at)
-                except AgentTimeoutError:
-                    self._mark_plan_step_failed(state)
+                        self._check_timeout(started_at)
+                    except AgentTimeoutError:
+                        self._mark_plan_step_failed(state)
 
-                    logger.warning(
-                        "agent_timeout "
-                        "execution_id=%s "
-                        "request_id=%s "
-                        "conversation_id=%s "
-                        "step=%d",
-                        execution_id,
-                        request_id,
-                        conversation_id,
-                        step_number,
-                    )
+                        logger.warning(
+                            "agent_timeout "
+                            "execution_id=%s "
+                            "request_id=%s "
+                            "conversation_id=%s "
+                            "step=%d",
+                            execution_id,
+                            request_id,
+                            conversation_id,
+                            step_number,
+                        )
 
-                    return self._fail(
-                        state=state,
-                        execution_id=execution_id,
-                        error="Agent execution timed out.",
-                    )
-                except Exception as exc:
-                    self._mark_plan_step_failed(state)
+                        return self._fail(
+                            state=state,
+                            execution_id=execution_id,
+                            error="Agent execution timed out.",
+                        )
 
-                    logger.exception(
-                        "agent_execution_failed "
-                        "execution_id=%s "
-                        "request_id=%s "
-                        "conversation_id=%s "
-                        "step=%d "
-                        "reason=llm_failure",
-                        execution_id,
-                        request_id,
-                        conversation_id,
-                        step_number,
-                    )
+                    except LLMProviderError as exc:
+                        self._mark_plan_step_failed(state)
 
-                    return self._fail(
-                        state=state,
-                        execution_id=execution_id,
-                        error=(
-                            "The agent could not obtain a decision "
-                            "from the language model."
-                        ),
-                    )
+                        logger.exception(
+                            "agent_execution_failed "
+                            "execution_id=%s "
+                            "request_id=%s "
+                            "conversation_id=%s "
+                            "step=%d "
+                            "reason=llm_provider_failure",
+                            execution_id,
+                            request_id,
+                            conversation_id,
+                            step_number,
+                        )
+
+                        return self._fail(
+                            state=state,
+                            execution_id=execution_id,
+                            error=str(exc),
+                        )
+
+                    
+                    except Exception as exc:
+                        self._mark_plan_step_failed(state)
+
+                        logger.exception(
+                            "agent_execution_failed "
+                            "execution_id=%s "
+                            "request_id=%s "
+                            "conversation_id=%s "
+                            "step=%d "
+                            "reason=llm_failure",
+                            execution_id,
+                            request_id,
+                            conversation_id,
+                            step_number,
+                        )
+
+                        return self._fail(
+                            state=state,
+                            execution_id=execution_id,
+                            error=(
+                                "The agent could not obtain a decision "
+                                "from the language model."
+                            ),
+                        )
+
+                    if response.tool_calls:
+                        pending_tool_calls = list(response.tool_calls)
+
+                        tool_call = pending_tool_calls.pop(0)
+                        pending_tool_call_id = tool_call.id
+
+                        response_for_action = LLMResponse(
+                            text=None,
+                            tool_calls=[tool_call],
+                        )
+                    else:
+                        pending_tool_call_id = None
+                        response_for_action = response
 
                 try:
-                    action = decide_action(response)
+                    action = decide_action(response_for_action)
                     self._validate_action(action)
                 except MalformedAgentResponseError:
                     self._mark_plan_step_failed(state)
@@ -794,7 +857,7 @@ class AgentService:
                     )
 
                     tool_result = ToolResult(
-                        tool_call_id=None,
+                        tool_call_id=pending_tool_call_id,
                         name=tool_name,
                         result=execution.get(
                             "result"
@@ -805,7 +868,7 @@ class AgentService:
                         ),
                     )
 
-                    tool_results = [tool_result]
+                    tool_results.append(tool_result)
 
                     state.tool_calls.append(
                         {
