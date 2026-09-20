@@ -4,7 +4,7 @@ import time
 import uuid
 
 from typing import Any
-
+from app.core.exceptions import InvalidToolArgumentsError
 from app.logging.context import get_request_id
 from app.logging.logger import logger
 from app.schemas.agent import (
@@ -259,7 +259,7 @@ class AgentService:
 
                     try:
                         self._check_timeout(started_at)
-                        
+
                         results_for_provider = tool_results or None
                         tool_results = []
                         response = (
@@ -829,6 +829,32 @@ class AgentService:
                             "error": "Invalid tool arguments.",
                         }
 
+
+
+                    except InvalidToolArgumentsError:
+                        self._mark_plan_step_failed(state)
+
+                        logger.exception(
+                            "agent_execution_failed "
+                            "execution_id=%s "
+                            "request_id=%s "
+                            "conversation_id=%s "
+                            "step=%d "
+                            "reason=invalid_tool_arguments",
+                            execution_id,
+                            request_id,
+                            conversation_id,
+                            step_number,
+                        )
+
+                        return self._fail(
+                            state=state,
+                            execution_id=execution_id,
+                            error="Agent produced an invalid response.",
+                        )
+
+
+                    
                     except Exception:
                         logger.exception(
                             "agent_tool_execution_failed "

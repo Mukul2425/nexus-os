@@ -2,8 +2,8 @@
   "version": "1.0",
   "metrics": {
     "total_tasks": 10,
-    "successful_tasks": 10,
-    "task_success_rate": 1.0,
+    "successful_tasks": 9,
+    "task_success_rate": 0.9,
     "tool_selection_accuracy": 1.0,
     "tool_execution_success_rate": 1.0,
     "average_steps": 1.9,
@@ -112,7 +112,7 @@
     {
       "task_id": "memory_001",
       "category": "memory",
-      "passed": true,
+      "passed": false,
       "status_correct": true,
       "action_sequence_correct": true,
       "tool_selection_correct": true,
@@ -123,7 +123,9 @@
       "max_step_failure": false,
       "answer_relevance": 1.0,
       "groundedness": 1.0,
-      "errors": []
+      "errors": [
+        "Memory retrieval was required but no memories were returned."
+      ]
     },
     {
       "task_id": "multi_step_001",
