@@ -21,7 +21,7 @@ from app.schemas.llm import (
 from app.services.llm.provider import LLMProvider
 
 
-MODEL_NAME = "gemini-3.5-flash"
+MODEL_NAME = "gemini-3.1-flash-lite"
 
 
 class GeminiProvider(LLMProvider):
@@ -29,8 +29,25 @@ class GeminiProvider(LLMProvider):
     def __init__(self):
 
         self.client = genai.Client(
-            api_key=settings.GEMINI_API_KEY
-        )
+        api_key=settings.GEMINI_API_KEY,
+        http_options=types.HttpOptions(
+            timeout=int(
+                settings.GEMINI_TIMEOUT_SECONDS * 1000
+            ),
+            retry_options=types.HttpRetryOptions(
+                attempts=settings.GEMINI_MAX_RETRIES,
+                initial_delay=settings.GEMINI_RETRY_INITIAL_DELAY_SECONDS,
+                max_delay=settings.GEMINI_RETRY_MAX_DELAY_SECONDS,
+                http_status_codes=[
+                    408,
+                    500,
+                    502,
+                    503,
+                    504,
+                ],
+            ),
+        ),
+    )
 
     # ---------------------------------------------------------
     # Message conversion
@@ -78,6 +95,35 @@ class GeminiProvider(LLMProvider):
 
         return system_instruction, contents
 
+    @staticmethod
+    def _classify_error(exc: Exception) -> str:
+        message = str(exc).lower()
+
+        if "429" in message or "resource_exhausted" in message:
+            return "rate_limited"
+
+        if "401" in message or "403" in message:
+            return "authentication_or_permission"
+
+        if "408" in message:
+            return "request_timeout"
+
+        if "500" in message:
+            return "provider_500"
+
+        if "502" in message:
+            return "provider_502"
+
+        if "503" in message:
+            return "provider_503"
+
+        if "504" in message:
+            return "provider_504"
+
+        if "timeout" in message:
+            return "request_timeout"
+
+        return "provider_error"
     # ---------------------------------------------------------
     # Normal generation
     # ---------------------------------------------------------
@@ -134,15 +180,18 @@ class GeminiProvider(LLMProvider):
         except Exception as exc:
 
             latency = perf_counter() - start
+            error_type = self._classify_error(exc)
 
             logger.exception(
                 "llm_error "
                 "request_id=%s "
                 "provider=gemini "
                 "model=%s "
+                "error_type=%s "
                 "latency=%.3fs",
                 request_id,
                 MODEL_NAME,
+                error_type,
                 latency,
             )
 
@@ -382,15 +431,18 @@ class GeminiProvider(LLMProvider):
         except Exception as exc:
 
             latency = perf_counter() - start
+            error_type = self._classify_error(exc)
 
             logger.exception(
-                "llm_tool_error "
+                "llm_error "
                 "request_id=%s "
                 "provider=gemini "
                 "model=%s "
+                "error_type=%s "
                 "latency=%.3fs",
                 request_id,
                 MODEL_NAME,
+                error_type,
                 latency,
             )
 
@@ -463,17 +515,19 @@ class GeminiProvider(LLMProvider):
         except Exception as exc:
 
             latency = perf_counter() - start
+            error_type = self._classify_error(exc)
 
             logger.exception(
-                "llm_stream_error "
+                "llm_error "
                 "request_id=%s "
                 "provider=gemini "
                 "model=%s "
-                "chunks=%d "
+                "error_type=%s "
                 "latency=%.3fs",
                 request_id,
                 MODEL_NAME,
-                chunk_count,
+                error_type,
+                latency,
             )
 
             raise LLMProviderError() from exc

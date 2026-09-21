@@ -1,33 +1,5 @@
 # Nexus OS Roadmap
 
-## Vision
-
-Nexus OS is evolving from a simple LLM backend into a modular AI application platform.
-
-```text
-Chat
-  ↓
-Conversation
-  ↓
-Observability
-  ↓
-Production Hardening
-  ↓
-Provider Abstraction
-  ↓
-RAG
-  ↓
-RAG Evaluation
-  ↓
-Tool Calling
-  ↓
-Memory
-  ↓
-Agentic Orchestration
-```
-
----
-
 # Completed Milestones
 
 ## v0.1 — Backend Foundation
@@ -62,13 +34,13 @@ Agentic Orchestration
 
 **Status: ✅ Complete**
 
-* Centralized logging
+* Centralized application logging
 * Request IDs
 * Request middleware
-* Latency logging
+* Request latency tracking
 * LLM operation logging
+* Conversation-level logging
 * Streaming observability
-* Correlated request logging
 
 ---
 
@@ -77,12 +49,15 @@ Agentic Orchestration
 **Status: ✅ Complete**
 
 * Pydantic Settings
-* Environment configuration
+* Environment-based configuration
 * `.env` support
-* Centralized exceptions
+* `.env.example`
+* Application exception hierarchy
+* Global FastAPI exception handling
 * Standardized API errors
 * Provider failure handling
-* Test infrastructure
+* Pytest infrastructure
+* Unit and integration testing
 
 ---
 
@@ -90,12 +65,12 @@ Agentic Orchestration
 
 **Status: ✅ Complete**
 
-* `LLMProvider`
+* `LLMProvider` abstraction
 * Gemini provider
 * Provider factory
-* Provider-neutral errors
-* Normal generation
-* Streaming generation
+* Configuration-based provider selection
+* Provider-level streaming abstraction
+* Provider-specific implementation isolation
 * Provider tests
 
 ---
@@ -146,9 +121,7 @@ Agentic Orchestration
 * Gemini function calling
 * Tool execution loop
 * Maximum tool-call protection
-* RAG + tools compatibility
-
-Tool-aware streaming was intentionally deferred because the existing streaming abstraction currently produces plain text events.
+* RAG + tool compatibility
 
 ---
 
@@ -156,193 +129,291 @@ Tool-aware streaming was intentionally deferred because the existing streaming a
 
 **Status: ✅ Complete**
 
-### Memory
-
-* SQLAlchemy memory model
-* UUID memory IDs
-* Semantic and episodic memory
-* Importance scoring
-* Memory timestamps
-* Indexed database records
-
-### CRUD
-
-* Create
-* Read
-* List
-* Update
-* Delete
-* Pagination
-* Validation
-* Error handling
-
-### Extraction
-
-* Memory candidate schema
-* LLM extraction
-* Confidence scoring
-* Importance scoring
-* Memory classification
-* Malformed-output handling
-
-### Eligibility
-
-* Confidence filtering
-* Blank-content rejection
-* Invalid-type rejection
-* Question filtering
-* Temporary-request filtering
-* Small-talk filtering
-* Inference rejection
-
-### Deduplication
-
-* Content normalization
-* Whitespace normalization
-* Punctuation normalization
-* Duplicate detection
-* Duplicate persistence prevention
-
-### Vector Memory
-
+* Memory model
+* Persistent memory storage
+* Semantic and episodic memories
+* Memory CRUD API
+* Automatic memory extraction
+* Eligibility filtering
+* Memory normalization
+* Deduplication
 * ChromaDB memory collection
-* Existing embedding infrastructure
-* Memory embeddings
-* Metadata linking
-* Vector update
-* Vector deletion
-* Semantic search
-* Distance thresholding
-
-### Conflict Detection
-
-* Related-memory retrieval
-* Semantic conflict detection
-* LLM conflict classification
-* Failure-safe behavior
-
-Automatic conflict resolution is intentionally deferred.
-
-### Retrieval
-
 * Semantic memory retrieval
-* Configurable top-K
 * Distance filtering
-* Stale-vector handling
-* SQLite source-of-truth lookup
-* Retrieval observability
-
-### Chat Integration
-
-* Memory retrieval in `/chat`
-* Memory retrieval in `/chat/stream`
-* Post-generation memory extraction
+* Conflict detection
+* Memory context integration
+* Chat integration
+* Streaming integration
 * RAG compatibility
 * Tool compatibility
-* Failure isolation
+* Memory failure isolation
+* Memory evaluation
+* Comprehensive memory testing
 
-### Testing
+---
 
-**108 tests passing**
+# v1.0 — Agentic Orchestration
+
+**Status: ✅ Complete**
+
+### Agent Core
+
+* Agent abstraction
+* `AgentService`
+* `AgentState`
+* `AgentStep`
+* `AgentResult`
+* Agent execution statuses
+* Controlled execution lifecycle
+
+### Execution
+
+* Multi-step execution loop
+* Sequential action execution
+* Observation → action flow
+* Agent-controlled termination
+* Maximum execution steps
+* Loop protection
+
+### Tools
+
+* Agent-driven tool selection
+* Tool argument handling
+* Tool execution
+* Multiple tool calls
+* Tool failure handling
+* Unknown-tool protection
+* Invalid-argument handling
+
+### RAG
+
+* Agent RAG retrieval
+* Retrieved context as agent observation
+* RAG source attribution
+* RAG failure isolation
+* Agent RAG evaluation
+
+### Memory
+
+* Agent memory retrieval
+* Memory-aware agent context
+* Persistent memory integration
+* Memory failure isolation
+* Stale-memory protection
+* Memory evaluation
+
+### Planning
+
+* Lightweight task planner
+* Step-based task representation
+* Short-plan generation
+* Sequential plan execution
+* Step tracking
+* Plan progress
+* Plan termination
+* Plan length limits
+
+### Safety
+
+* `MAX_AGENT_STEPS`
+* `MAX_TOOL_CALLS`
+* Execution timeout
+* Invalid action handling
+* Unknown tool handling
+* Malformed response handling
+* Loop protection
+* Controlled termination
+
+### API
+
+* `POST /agent/run`
+* Agent request schema
+* Agent response schema
+* Execution ID
+* Execution metadata
+* Controlled agent errors
+
+### Observability
+
+* Agent execution lifecycle events
+* Execution IDs
+* Request IDs
+* Conversation IDs
+* Step tracking
+* Latency tracking
+* Tool-call tracking
+* Final execution status
+
+### Evaluation
+
+* Agent evaluation dataset
+* Direct-answer tasks
+* Tool tasks
+* RAG tasks
+* Memory tasks
+* Multi-step tasks
+* Mixed-capability tasks
+* Task success rate
+* Tool-selection accuracy
+* Tool-execution success
+* Unnecessary tool-call tracking
+* Average-step tracking
+* Groundedness
+* Answer relevance
+* Multi-tool evaluation
+
+### Compatibility
+
+* Existing `/chat` preserved
+* Existing `/chat/stream` preserved
+* RAG preserved
+* Memory preserved
+* Tool calling preserved
+* LLM provider abstraction preserved
+* Existing regression suite preserved
 
 ---
 
 # Current Architecture
 
 ```text
-                         ┌─────────────┐
-                         │    User     │
-                         └──────┬──────┘
-                                │
-                                ▼
-                         ┌─────────────┐
-                         │   FastAPI   │
-                         └──────┬──────┘
-                                │
-                                ▼
-                    ┌──────────────────────┐
-                    │ ConversationService │
-                    └───────┬─────┬────────┘
-                            │     │
-             ┌──────────────┘     └──────────────┐
-             ▼                                   ▼
-      ┌─────────────┐                     ┌─────────────┐
-      │ Conversation│                     │    Memory   │
-      │   History   │                     │   System    │
-      └──────┬──────┘                     └──────┬──────┘
-             │                                   │
-             ▼                                   ▼
-         SQLite                              SQLite
-                                                 │
-                                                 ▼
-                                            ChromaDB
-
-                    ┌─────────────┐
-                    │     RAG     │
-                    └──────┬──────┘
-                           │
-                           ▼
-                       ChromaDB
-
-                            │
-                            ▼
-                    ┌─────────────┐
-                    │   Context   │
-                    │   Builder   │
-                    └──────┬──────┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │ LLM Provider│
-                    └──────┬──────┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │    Tools    │
-                    └─────────────┘
+                              ┌──────────────┐
+                              │     User     │
+                              └──────┬───────┘
+                                     │
+                                     ▼
+                              ┌──────────────┐
+                              │   FastAPI    │
+                              └──────┬───────┘
+                                     │
+                    ┌────────────────┴────────────────┐
+                    │                                 │
+                    ▼                                 ▼
+             ┌─────────────┐                  ┌─────────────┐
+             │    Chat     │                  │    Agent    │
+             │   Service   │                  │   Service   │
+             └──────┬──────┘                  └──────┬──────┘
+                    │                                │
+                    │                    ┌───────────┼───────────┐
+                    │                    │           │           │
+                    │                    ▼           ▼           ▼
+                    │                ┌────────┐ ┌────────┐ ┌────────┐
+                    │                │ Memory │ │  RAG   │ │ Tools  │
+                    │                └───┬────┘ └───┬────┘ └───┬────┘
+                    │                    │          │          │
+                    └────────────────────┼──────────┼──────────┘
+                                         │          │
+                                         ▼          ▼
+                                      Context / Execution
+                                             │
+                                             ▼
+                                      ┌──────────────┐
+                                      │ LLM Provider │
+                                      └──────┬───────┘
+                                             │
+                                             ▼
+                                      ┌──────────────┐
+                                      │ Agent Result │
+                                      └──────────────┘
 ```
 
 ---
 
-# v1.0 — Agentic Orchestration
+# v1.0 Agent Execution Flow
 
-**Status: ⏳ Planned**
-
-The next major milestone will focus on orchestrating the capabilities already built.
-
-Potential areas:
-
-* Agent state
-* Planning
-* Tool selection
-* Multi-step execution
-* Task decomposition
-* Agent execution loop
-* Memory usage during execution
-* RAG usage during execution
-* Tool usage during execution
-* Agent failure recovery
-* Execution limits
-* Agent evaluation
-
-The goal is not to create a complex autonomous system immediately.
-
-The goal is to build a **controlled, observable, testable agent execution loop**.
+```text
+User Request
+     │
+     ▼
+AgentService
+     │
+     ▼
+Initialize AgentState
+     │
+     ▼
+Create / Update Plan
+     │
+     ▼
+┌───────────────────────┐
+│     Agent Loop        │
+│                       │
+│  Decide Next Action   │
+│          │            │
+│          ▼            │
+│  ┌─────────────────┐  │
+│  │ Direct Answer?  │──┼──────► Final Response
+│  └────────┬────────┘  │
+│           │ No        │
+│           ▼           │
+│    Select Capability  │
+│           │           │
+│     ┌─────┼─────┐     │
+│     ▼     ▼     ▼     │
+│  Memory  RAG  Tool    │
+│     │     │     │     │
+│     └─────┼─────┘     │
+│           ▼           │
+│      Observation      │
+│           │           │
+│           ▼           │
+│     Update State      │
+│           │           │
+│           ▼           │
+│   Continue / Stop     │
+└───────────┬───────────┘
+            │
+            ▼
+      Agent Result
+```
 
 ---
 
-# Deferred / Future Work
+# Nexus OS Capability Stack
 
-The following are intentionally not part of the current roadmap milestones unless justified by future requirements:
+```text
+┌───────────────────────────────────────────┐
+│              Agentic Layer                │
+│       Planning • Execution • State        │
+├───────────────────────────────────────────┤
+│              Memory Layer                 │
+│      Extraction • Retrieval • Lifecycle   │
+├───────────────────────────────────────────┤
+│                RAG Layer                  │
+│       Embeddings • Retrieval • Context   │
+├───────────────────────────────────────────┤
+│              Tool Layer                   │
+│       Registry • Execution • Results     │
+├───────────────────────────────────────────┤
+│            LLM Provider Layer             │
+│       Provider Abstraction • Gemini      │
+├───────────────────────────────────────────┤
+│           Conversation Layer              │
+│        Sessions • Messages • History     │
+├───────────────────────────────────────────┤
+│       Reliability & Observability         │
+│     Config • Errors • Logging • Tests    │
+└───────────────────────────────────────────┘
+```
 
-* Automatic memory conflict resolution
-* Graph-based memory
-* Multi-agent memory
-* Cognitive memory simulation
-* Reinforcement-learning memory
-* Multiple vector databases
-* Enterprise privacy platform
-* Complex autonomous behavior
-* Frontend before the core AI architecture is mature
+---
 
-Future features should be driven by actual system requirements and evaluation results rather than complexity for its own sake.
+# Next Evolution
+
+**v1.0 completes the core AI execution architecture.**
+
+Future versions should focus on strengthening and productizing the system rather than continuously expanding the agent architecture.
+
+Potential areas include:
+
+* Production hardening
+* Agent evaluation improvements
+* Better streaming/event architecture
+* Authentication and user isolation
+* Persistent agent execution
+* Frontend/client integration
+* Performance optimization
+* Deployment infrastructure
+* Additional tools based on actual requirements
+* Advanced memory lifecycle management
+
+Complex multi-agent systems and autonomous background agents remain outside the current scope.

@@ -1,0 +1,144 @@
+{
+  "version": "1.0",
+  "description": "Nexus OS v1.0 agent evaluation dataset",
+  "tasks": [
+    {
+      "id": "direct_answer_001",
+      "category": "direct_answer",
+      "conversation_id": "eval-direct-001",
+      "message": "What is FastAPI?",
+      "expected": {
+        "status": "completed",
+        "action_types": ["answer"],
+        "tool_names": [],
+        "required_keywords": ["api", "python"],
+        "max_tool_calls": 0,
+        "max_steps": 2
+      }
+    },
+    {
+      "id": "calculator_001",
+      "category": "tool",
+      "conversation_id": "eval-tool-001",
+      "message": "Calculate 125 * 42.",
+      "expected": {
+        "status": "completed",
+        "action_types": ["tool", "answer"],
+        "tool_names": ["calculator"],
+        "required_keywords": ["5250"],
+        "min_tool_calls": 1,
+        "max_tool_calls": 1,
+        "max_steps": 3
+      }
+    },
+    {
+      "id": "calculator_002",
+      "category": "tool",
+      "conversation_id": "eval-tool-002",
+      "message": "Calculate 144 / 12.",
+      "expected": {
+        "status": "completed",
+        "action_types": ["tool", "answer"],
+        "tool_names": ["calculator"],
+        "required_keywords": ["12"],
+        "min_tool_calls": 1,
+        "max_tool_calls": 1,
+        "max_steps": 3
+      }
+    },
+    {
+      "id": "time_001",
+      "category": "tool",
+      "conversation_id": "eval-tool-003",
+      "message": "What time is it in London?",
+      "expected": {
+        "status": "completed",
+        "action_types": ["tool", "answer"],
+        "tool_names": ["time"],
+        "min_tool_calls": 1,
+        "max_tool_calls": 1,
+        "max_steps": 3
+      }
+    },
+    {
+      "id": "rag_001",
+      "category": "rag",
+      "conversation_id": "eval-rag-001",
+      "message": "According to the Nexus documentation, what is the provider architecture?",
+      "expected": {
+        "status": "completed",
+        "action_types": ["rag", "answer"],
+        "tool_names": [],
+        "requires_rag": true,
+        "max_steps": 3
+      }
+    },
+    {
+      "id": "rag_002",
+      "category": "rag",
+      "conversation_id": "eval-rag-002",
+      "message": "According to the Nexus documentation, what is the purpose of RAG?",
+      "expected": {
+        "status": "completed",
+        "action_types": ["rag", "answer"],
+        "tool_names": [],
+        "requires_rag": true,
+        "max_steps": 3
+      }
+    },
+    {
+      "id": "memory_001",
+      "category": "memory",
+      "conversation_id": "eval-memory-001",
+      "message": "Which backend stack should I use based on my preferences?",
+      "expected": {
+        "status": "completed",
+        "action_types": ["memory", "answer"],
+        "tool_names": [],
+        "requires_memory": true,
+        "max_steps": 3
+      }
+    },
+    {
+      "id": "multi_step_001",
+      "category": "multi_step",
+      "conversation_id": "eval-multi-001",
+      "message": "Get the time in London and then calculate 25 * 4.",
+      "expected": {
+        "status": "completed",
+        "action_types": ["tool", "tool", "answer"],
+        "tool_names": ["time", "calculator"],
+        "min_tool_calls": 2,
+        "max_tool_calls": 2,
+        "max_steps": 5
+      }
+    },
+    {
+      "id": "direct_answer_002",
+      "category": "direct_answer",
+      "conversation_id": "eval-direct-002",
+      "message": "Explain what an API is in simple terms.",
+      "expected": {
+        "status": "completed",
+        "action_types": ["answer"],
+        "tool_names": [],
+        "required_keywords": ["request", "response"],
+        "max_tool_calls": 0,
+        "max_steps": 2
+      }
+    },
+    {
+      "id": "mixed_001",
+      "category": "mixed",
+      "conversation_id": "eval-mixed-001",
+      "message": "Use the Nexus documentation to explain the provider architecture and give me a concise answer.",
+      "expected": {
+        "status": "completed",
+        "action_types": ["rag", "answer"],
+        "tool_names": [],
+        "requires_rag": true,
+        "max_steps": 3
+      }
+    }
+  ]
+}

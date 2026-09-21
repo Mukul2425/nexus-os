@@ -286,45 +286,45 @@ v0.1.0
     Automatic conflict resolution is intentionally deferred.
     Memory Retrieval
 ##   Added:
-    MemoryRetriever.
-    Semantic search.
-    Configurable top-K.
-    Distance thresholds.
-    Stale-vector handling.
-    SQLite source-of-truth lookup.
-    Retrieval latency logging.
-    Retrieval lifecycle logging.
-    Chat Integration
-    Memory is now integrated into:
-    POST /chat
-    POST /chat/stream
-    The chat pipeline can:
-    Retrieve relevant memories.
-    Build memory context.
-    Combine memory with conversation and RAG context.
-    Generate the response.
-    Extract new memories after response generation.
-    Memory failures are isolated from normal chat execution.
-    Compatibility
-    Verified compatibility with:
-    Conversation history.
-    RAG.
-    Tool calling.
-    Streaming.
-    Existing provider abstraction.
-    Existing exception handling.
-    Existing observability.
-    Testing
-    Expanded the test suite across memory functionality.
-    Final result:
-    108 passed
-    Changed
-    Conversation context now supports relevant persistent memories.
-    Chat requests can use long-term memory in addition to conversation history and RAG.
-    Memory extraction occurs after response generation.
-    Memory indexing is best-effort so vector-store failures do not invalidate successful SQLite CRUD operations.
-    Reliability
-    Memory functionality was designed with failure isolation:
+-  MemoryRetriever.
+-  Semantic search.
+-  Configurable top-K.
+-  Distance thresholds.
+-  Stale-vector handling.
+-  SQLite source-of-truth lookup.
+-  Retrieval latency logging.
+-  Retrieval lifecycle logging.
+-  Chat Integration
+-  Memory is now integrated into:
+-  POST /chat
+-  POST /chat/stream
+-  The chat pipeline can:
+-  Retrieve relevant memories.
+-  Build memory context.
+-  Combine memory with conversation and RAG context.
+-  Generate the response.
+-  Extract new memories after response generation.
+-  Memory failures are isolated from normal chat execution.
+-  Compatibility
+-  Verified compatibility with:
+-  Conversation history.
+-  RAG.
+-  Tool calling.
+-  Streaming.
+-  Existing provider abstraction.
+-  Existing exception handling.
+-  Existing observability.
+-  Testing
+-  Expanded the test suite across memory functionality.
+##  Final result:
+-  108 passed
+-  Changed
+-  Conversation context now supports relevant persistent memories.
+-  Chat requests can use long-term memory in addition to conversation history and RAG.
+-  Memory extraction occurs after response generation.
+-  Memory indexing is best-effort so vector-store failures do not invalidate successful SQLite CRUD operations.
+-  Reliability
+-  Memory functionality was designed with failure isolation:
     Memory Retrieval Failure
             ↓
         Log Error
@@ -353,3 +353,271 @@ v0.1.0
     Streaming integration tests.
     RAG compatibility tests.
     Tool compatibility tests.
+
+
+# Changelog
+
+All notable changes to Nexus OS are documented here.
+
+---
+
+## [1.0.0] — Agentic Orchestration
+
+### Added
+
+#### Agent Core
+
+* Introduced `AgentService` for agent orchestration.
+* Added explicit `AgentState`.
+* Added `AgentStep`.
+* Added `AgentResult`.
+* Added agent execution statuses.
+* Added controlled agent execution lifecycle.
+* Separated agent orchestration from `ConversationService`.
+
+#### Agent Execution Loop
+
+* Added multi-step agent execution loop.
+* Added sequential action execution.
+* Added observation → next-action flow.
+* Added agent-controlled termination.
+* Added configurable maximum execution steps.
+* Added infinite-loop protection.
+* Added multi-step execution support.
+
+#### Tool Integration
+
+* Agent receives available tool definitions.
+* Added agent-driven tool selection.
+* Added tool argument handling.
+* Added tool execution through the existing tool infrastructure.
+* Added tool result feedback to the agent.
+* Added support for multiple tool calls within an execution.
+* Added unknown-tool protection.
+* Added invalid-argument handling.
+* Added tool failure handling.
+* Added unnecessary tool usage evaluation.
+
+#### RAG Integration
+
+* Agent can invoke RAG retrieval.
+* Retrieved documents are available as agent observations.
+* Agent can continue execution after retrieval.
+* Existing RAG source attribution is preserved.
+* Added RAG relevance handling during agent execution.
+* RAG failures are isolated from the overall agent execution.
+* Added agent-level RAG evaluation.
+
+#### Memory Integration
+
+* Agent can retrieve relevant persistent memories.
+* Retrieved memories are available as agent context.
+* Agent can use memory during task execution.
+* Existing memory safety rules are preserved.
+* Memory failures are isolated from agent execution.
+* Integrated persistent memory into the agent execution flow.
+* Added stale-memory/vector protection.
+* Added agent-level memory evaluation.
+
+#### Task Planning
+
+* Added lightweight task planning.
+* Tasks can be represented as execution steps.
+* Added short-plan generation.
+* Added sequential plan execution.
+* Added completed-step tracking.
+* Added failed-step tracking.
+* Added plan progress tracking.
+* Added plan length limitations.
+* Added plan termination.
+* Preserved agent state across execution steps.
+
+#### Execution Safety
+
+* Added `MAX_AGENT_STEPS`.
+* Added `MAX_TOOL_CALLS`.
+* Added configurable execution timeout.
+* Added invalid-action handling.
+* Added unknown-tool protection.
+* Added malformed agent-response handling.
+* Added invalid tool-argument handling.
+* Added repeated-action / loop protection.
+* Added controlled agent termination.
+* Added configurable execution safety limits.
+
+#### Agent State
+
+Agent execution state now tracks:
+
+* Task
+* Conversation ID
+* Current step
+* Plan
+* Observations
+* Tool calls
+* Retrieved memories
+* Retrieved documents
+* Execution status
+* Final response
+* Step history
+* Plan progress
+
+#### Agent API
+
+Added:
+
+* `POST /agent/run`
+* Agent request schema
+* Agent response schema
+* Execution ID
+* Execution metadata
+* Agent-specific error handling
+* Request validation
+
+Existing APIs remain available:
+
+* `POST /chat`
+* `POST /chat/stream`
+
+#### Agent Observability
+
+Added agent execution lifecycle logging:
+
+* `agent_execution_started`
+* `agent_step_started`
+* `agent_action_selected`
+* `agent_tool_execution_started`
+* `agent_tool_execution_complete`
+* `agent_observation_received`
+* `agent_step_complete`
+* `agent_execution_complete`
+* `agent_execution_failed`
+* `agent_max_steps_reached`
+
+Added tracking for:
+
+* Execution ID
+* Request ID
+* Conversation ID
+* Step number
+* Execution latency
+* Tool-call count
+* Final execution status
+
+Sensitive information is not unnecessarily included in agent logs.
+
+#### Failure & Recovery
+
+Added handling for:
+
+* LLM failures
+* Tool failures
+* RAG failures
+* Memory failures
+* Invalid actions
+* Invalid arguments
+* Maximum-step failures
+* Execution timeouts
+* Malformed agent responses
+
+Optional systems such as RAG and memory are isolated so their failures do not unnecessarily terminate the entire agent execution.
+
+#### Agent Evaluation
+
+Added:
+
+```text
+evaluation/agent/tasks.json
+```
+
+Evaluation coverage includes:
+
+* Direct-answer tasks
+* Tool tasks
+* RAG tasks
+* Memory tasks
+* Multi-step tasks
+* Mixed-capability tasks
+
+Added live `AgentService` evaluation with:
+
+* Provider failure handling
+* Evaluation fail-fast behavior
+* Stale-memory handling
+* Evaluation report generation
+
+#### Evaluation Metrics
+
+Added evaluation for:
+
+* Task success rate
+* Tool-selection accuracy
+* Tool-execution success
+* Unnecessary tool calls
+* Average execution steps
+* Maximum-step failures
+* Final answer relevance
+* Answer groundedness
+* Numeric answer normalization
+* Multi-tool execution
+
+### Improved
+
+* Nexus can now execute controlled multi-step tasks instead of only performing single-turn LLM/tool interactions.
+* Tool calling is now orchestrated by an agent execution loop.
+* RAG and persistent memory can participate in agent execution.
+* Agent state is explicitly tracked across multiple execution steps.
+* Agent execution is bounded by configurable safety limits.
+* Agent failures are handled without unnecessarily breaking existing capabilities.
+* Existing conversation, RAG, memory, tool-calling, and provider abstractions remain compatible.
+* Agent execution is observable through request-level and execution-level logging.
+
+
+### Testing
+
+* Added agent core tests.
+* Added agent state tests.
+* Added agent step/result tests.
+* Added execution-loop tests.
+* Added multi-step execution tests.
+* Added maximum-step tests.
+* Added loop-protection tests.
+* Added tool selection tests.
+* Added multi-tool tests.
+* Added tool failure tests.
+* Added invalid-tool tests.
+* Added invalid-argument tests.
+* Added RAG integration tests.
+* Added memory integration tests.
+* Added agent API tests.
+* Added regression tests.
+* Full regression suite passing.
+
+### Out of Scope
+
+The following were intentionally excluded from v1.0:
+
+* Multi-agent systems
+* Autonomous background agents
+* Agent marketplace
+* Complex planning algorithms
+* Reinforcement learning
+* Graph-based agent memory
+* Browser automation
+* Arbitrary code execution
+* Self-modifying agents
+* Distributed agent execution
+* Frontend / agent UI
+
+### Status
+
+**v1.0.0 — Agentic Orchestration: Complete**
+
+```text
+Batch 1 — Agent Core                 ✅
+Batch 2 — Memory + RAG               ✅
+Batch 3 — Lightweight Planning       ✅
+Batch 4 — Safety & Failure Recovery  ✅
+Batch 5 — Agent API Integration      ✅
+Batch 6 — Agent Evaluation           ✅
+```
