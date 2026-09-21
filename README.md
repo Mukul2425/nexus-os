@@ -306,7 +306,7 @@ Automatic conflict resolution is intentionally deferred.
 
 # v1.0 — Agentic Orchestration
 
-**Status: ⏳ Planned**
+**Status: Completed**
 
 The next major milestone will focus on orchestrating the capabilities already built.
 
@@ -346,3 +346,47 @@ The following are intentionally not part of the current roadmap milestones unles
 * Frontend before the core AI architecture is mature
 
 Future features should be driven by actual system requirements and evaluation results rather than complexity for its own sake.
+
+
+## V- 1.0.0
+### Architecture
+
+```text
+                         ┌──────────────┐
+                         │     User     │
+                         └──────┬───────┘
+                                │
+                                ▼
+                         ┌──────────────┐
+                         │   FastAPI    │
+                         └──────┬───────┘
+                                │
+                                ▼
+                    ┌────────────────────────┐
+                    │      AgentService      │
+                    │                        │
+                    │   Agent State          │
+                    │   Planner              │
+                    │   Execution Loop       │
+                    │   Safety Limits        │
+                    └───────────┬────────────┘
+                                │
+              ┌─────────────────┼─────────────────┐
+              │                 │                 │
+              ▼                 ▼                 ▼
+        ┌──────────┐      ┌──────────┐      ┌──────────┐
+        │  Memory  │      │   RAG    │      │  Tools   │
+        └────┬─────┘      └────┬─────┘      └────┬─────┘
+             │                 │                 │
+             └─────────────────┼─────────────────┘
+                               │
+                               ▼
+                       ┌──────────────┐
+                       │ LLM Provider │
+                       └──────┬───────┘
+                              │
+                              ▼
+                       ┌──────────────┐
+                       │ Agent Result │
+                       └──────────────┘
+```
